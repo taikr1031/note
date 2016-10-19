@@ -1,0 +1,22 @@
+VMWARE：
+控制面板-服务：启动VMware NAT Service服务
+IP设置：参照虚拟机-》Edit-》Virtual Network Editor 中的 NAT 中的 subnet IP 和 Subnet mask
+192.168.244.7
+255.255.255.0
+192.168.244.2
+
+202.103.24.68
+
+
+cent01：3G内存、4核、20G硬盘
+cent02：2G内存、1核、10G硬盘
+cent02：2G内存、1核、10G硬盘
+cent04：2G内存、1核、10G硬盘
+cent05：2G内存、1核、10G硬盘
+cent06：2G内存、1核、10G硬盘
+
+#常用命令
+网络服务启动与关闭:
+[root@localhost ~]# service network stop    #关闭网络服务
+[root@localhost ~]# service network start   #启动网络服务
+[root@localhost ~]# service network restart #重启网络服务

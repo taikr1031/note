@@ -1,0 +1,37 @@
+windows：
+	fiddler
+	search everything
+	灵格斯
+	dbeaver
+	secureCRT
+	flashFXP
+	notepad++
+	360免费wifi
+	百度云管家
+	印象笔记
+	高强度文件夹加密大师
+	ultraISO
+	tortoiseSVN
+	easyBCD
+	福昕阅读器
+	快转视频格式转换器
+	powerCmd
+	robomongo
+	
+ubuntu：
+    krusader
+    bcloud
+    smplayer
+    sublime
+    星际译王
+    idea
+    genymotion
+    dbeaver
+    wps
+    genymotion
+    bcloud
+    clementine
+    gnome mplayer
+    dbeeaver
+    vmware
+    git     [diffmerge]

@@ -1,0 +1,139 @@
+Scala 作为一种面向对象的语言
+
+对方答复对方===343434dfeerer
+
+
+
+纯面向对象语言特点：
+ ¡ 封装/信息隐藏。
+ ¡ 继承。
+ ¡ 多态性/动态绑定。
+ ¡ 所有预定义的类型的对象。
+ ¡ 通过将消息发送到的对象执行所有操作。
+ ¡ 所有用户定义的类型都的对象。
+ 
+函数式编程语言特点：
+ ¡ 高阶函数 (第 4 章)
+ ¡ 词法闭包 (第 3 章)
+ ¡ 模式匹配 (第 2 和第 3 章)
+ ¡ 单个工作分配 (第 2 章)
+ ¡ 懒惰的评价 (第 2 章)
+ ¡ 类型推理 (第 2 章)
+ ¡ 尾调用优化 (第 5 章)
+ ¡ 链表 (第 2 和第 4 章)
+ ¡ Mondadic 影响 (第 5 章)
+
+Scala: the basics -> Getting started -> 2.2 Scala basics
+scala> val x:Int = 1
+x: Int = 1
+
+scala> val decimal = 11235
+decimal: Int = 11235
+
+scala> val decimal = 11235L
+decimal: Long = 11235
+
+scala> val hexa = 0x23
+hexa: Int = 35
+
+scala> val octa = 023
+hexa: Int = 19
+
+scala> val i2: Byte = 1
+i2: Byte = 1
+
+scala> val d = 0.0
+d: Double = 0.0
+
+scala> val new_line = '\n'
+new_line: Char =
+
+scala> val \u0061\u006e\u0073 = 42
+ans: Int = 42
+
+scala> val f = 0.0f
+f: Float = 0.0
+
+scala>val exponent = 1e30
+exponent: Double = 1.0E30
+
+scala> val myList = new java.util.ArrayList[String]()
+myList: java.util.ArrayList[String] = []
+
+scala> val bookName = "Scala in \"Action\""
+bookName: java.lang.String = Scala in "Action"
+
+scala> val multiLine = """This is a
+	| |multi line
+	| |string""".stripMargin
+multiLine: String =
+This is a
+multi line
+string
+
+scala> val name = "Nilanjan"
+name: String = Nilanjan
+scala> s"My name $name"
+res0: String = My name Nilanjan
+
+scala> val height = 1.9d
+height: Double = 1.9
+scala> val name = "James"
+name: String = James
+scala> println(f"$name%s is $height%2.2f meters tall")  //2.2 表示浮点型数值小数点前后位数
+James is 1.90 meters tall
+
+val book = <book>
+<title>Scala in Action</title>
+<author>Nilanjan Raychaudhuri</author>
+</book>
+
+scala> val message = "I didn't know xml could be so much fun"
+scala> val code = "1"
+scala> val alert = <alert>
+	<message priority={code}>{message}</message>
+	<date>{new java.util.Date()}</date>
+	</alert>
+alert: scala.xml.Elem =
+<alert>
+<message priority=”1”>
+I didn't know xml could be so much fun
+</message>
+<date>Fri Feb 19 19:18:08 EST 2010</date>
+</alert>
+
+scala> val first :: rest = List(1, 2, 3) //将LIST的第一个赋值给first, 后面的赋值给rest
+first: Int = 1
+rest: List[Int] = List(2, 3)
+
+scala> def myFirstMethod():String = { "exciting times ahead" } == scala> def myFirstMethod():String = "exciting times ahead"
+myFirstMethod: ()String
+scala> myFirstMethod()
+res6: java.lang.String = exciting times ahead
+
+scala> def myFirstMethod(){ "exciting times ahead" } //括号后面没有=，表示该函数没有返回值
+myFirstMethod: ()Unit
+scala> myFirstMethod()
+
+scala> def myFirstMethod = "exciting times ahead"
+myFirstMethod: java.lang.String
+scala> myFirstMethod
+res17: java.lang.String = exciting times ahead
+
+scala> def max(a: Int, b: Int) = if(a > b) a else b
+max: (a: Int,b: Int)Int
+scala> max(5, 4)
+res8: Int = 5
+
+scala> def toList[A](value:A) = List(value) //参数类型不定，泛型
+toList: [A](value: A)List[A]
+scala> toList(1)
+res16: List[Int] = List(1)
+scala> toList("Scala rocks")
+res15: List[java.lang.String] = List(Scala rocks)
+
+scala> val evenNumbers = List(2, 4, 6, 8, 10)
+scala> evenNumbers.foldLeft(0) { (a: Int, b:Int) => a + b }
+scala> evenNumbers.foldLeft(0) { _ + _ }
+scala> evenNumbers.foldLeft(0) { (a, b) => a + b }
+res20: Int = 30

@@ -1,0 +1,176 @@
+hadoop的RPC机制的实现主要用到了两个技术：动态代理和java NIO。
+
+FileSystem 通过读取配置文件得到实现类 DistributedFileSystem，通过反射将 DistributedFileSystem 初始化，调用 initialize () 方法对该对象的成员变量初始化。 在 initialize() 方法中new一个 this.dfs = new DFSClient(uri, conf, statistics); 的成员变量。
+在 DFSClient 中，通过hadoop的 RPC 机制，得到 SERVER 端(NameNode)的代理对象，还不满意，又对该代理对象再次动态代理，进行增强，并将该代理对象作为 DFSClient 的成员变量 this.namenode = proxyInfo.getProxy();
+
+
+/* Configuration.java */
+静态块中加载了
+static{
+    addDefaultResource("core-default.xml");
+    addDefaultResource("core-site.xml");
+}
+在 loadResources() 方法中：
+private void loadResources(Properties properties,
+						 ArrayList<Resource> resources,
+						 boolean quiet) {
+	if(loadDefaults) {
+	  for (String resource : defaultResources) { //TODO ZM [core-default.xml, core-site.xml]
+		loadResource(properties, new Resource(resource), quiet);
+	  }
+	}
+}
+通过调用getResource()方法，读取hadoop-common-2.2.0.jar文件class根目录中的core-default.xml
+URL url = getResource((String)resource);  //jar:file:/root/work/eclipse/other/userlib/hadooplib/hadoop-common-2.2.0.jar!/core-default.xml
+public URL getResource(String name) {
+	return classLoader.getResource(name); //name = core-default.xml
+}
+
+通过DocumentBuilder，将core-default.xml文件解析成Document
+doc = parse(builder, url);
+
+
+/* FileSystem.java */
+FileSystem fs = FileSystem.get(URI.create(dst), conf);
+FileSystem 类的父类 Configured 有成员属性：private Configuration conf;
+Configuration: core-default.xml, core-site.xml, mapred-default.xml, mapred-site.xml, yarn-default.xml, yarn-site.xml, hdfs-default.xml, hdfs-site.xml
+
+客户端调用 FileSystem fs = FileSystem.get(URI.create(dst), conf); 
+
+public static FileSystem get(URI uri, Configuration conf) throws IOException {
+	String disableCacheName = String.format("fs.%s.impl.disable.cache", scheme);
+    if (conf.getBoolean(disableCacheName, false)) {
+      return createFileSystem(uri, conf);
+    }
+}
+
+private static FileSystem createFileSystem(URI uri, Configuration conf) throws IOException {
+	Class<?> clazz = getFileSystemClass(uri.getScheme(), conf);
+	if (clazz == null) {
+	  throw new IOException("No FileSystem for scheme: " + uri.getScheme());
+	}
+	FileSystem fs = (FileSystem)ReflectionUtils.newInstance(clazz, conf); //通过反射将 DistributedFileSystem 初始化
+	fs.initialize(uri, conf); //对该对象的成员变量初始化
+	return fs;
+}
+
+public static Class<? extends FileSystem> getFileSystemClass(String scheme, Configuration conf) throws IOException {
+    if (!FILE_SYSTEMS_LOADED) {
+      loadFileSystems();
+	}
+	...
+	if (clazz == null) {
+      clazz = SERVICE_FILE_SYSTEMS.get(scheme); //获得calss org.apache.hadoop.hdfs.DistributedFileSystem 
+    }
+}
+
+private static void loadFileSystems() {
+    synchronized (FileSystem.class) {
+      if (!FILE_SYSTEMS_LOADED) {
+        ServiceLoader<FileSystem> serviceLoader = ServiceLoader.load(FileSystem.class);
+        for (FileSystem fs : serviceLoader) {
+          SERVICE_FILE_SYSTEMS.put(fs.getScheme(), fs.getClass());
+        }
+        FILE_SYSTEMS_LOADED = true;
+      }
+    }
+}
+	ServiceLoader<FileSystem> serviceLoader = ServiceLoader.load(FileSystem.class);
+	ServiceLoader载入class文件根目录中的 META-INF下的services文件夹的 org.apache.hadoop.fs.FileSystem 配置文件来指定实现，来装载指定的service provider。多个实现的时候使用换行。
+	hadoop-2.2.0-src\hadoop-common-project\hadoop-common\src\main\resources\META-INF\services\org.apache.hadoop.fs.FileSystem
+	hadoop-2.2.0-src\hadoop-hdfs-project\hadoop-hdfs\src\main\resources\META-INF\services\org.apache.hadoop.fs.FileSystem
+	clazz = SERVICE_FILE_SYSTEMS.get(scheme);
+	FileSystem fs = (FileSystem)ReflectionUtils.newInstance(clazz, conf);
+    fs.initialize(uri, conf);
+	通过以上的装载获得 org.apache.hadoop.hdfs.DistributedFileSystem 对象实例并初始化。
+
+public void initialize(URI uri, Configuration conf) throws IOException {
+    super.initialize(uri, conf);
+    setConf(conf);
+
+    String host = uri.getHost();
+    if (host == null) {
+      throw new IOException("Incomplete HDFS URI, no host: "+ uri);
+    }
+
+    this.dfs = new DFSClient(uri, conf, statistics);
+    this.uri = URI.create(uri.getScheme()+"://"+uri.getAuthority());
+    this.workingDir = getHomeDirectory();
+}
+  
+
+/* NetUtils.java */
+  public static SocketFactory getSocketFactory(Configuration conf,
+      Class<?> clazz) {
+
+
+getDefaultSocketFactory()
+
+public static SocketFactory getSocketFactoryFromProperty(
+      Configuration conf, String propValue) {
+    try {
+      Class<?> theClass = conf.getClassByName(propValue);
+      return (SocketFactory) ReflectionUtils.newInstance(theClass, conf); //org.apache.hadoop.net.StandardSocketFactory
+
+    } catch (ClassNotFoundException cnfe) {
+      throw new RuntimeException("Socket Factory class not found: " + cnfe);
+    }
+}
+  
+/* DFSClient.java */
+	proxyInfo = NameNodeProxies.createProxy(conf, nameNodeUri, ClientProtocol.class);
+	NameNodeProxies
+		proxy = (T) createNNProxyWithClientProtocol(nnAddr, conf, ugi, withRetries);
+
+		
+/* NameNodeProxies.java */
+proxy = (T) createNNProxyWithClientProtocol(nnAddr, conf, ugi,
+          withRetries);
+
+public static <T> ProxyAndInfo<T> createProxy(Configuration conf,
+      URI nameNodeUri, Class<T> xface) throws IOException {	//xface:interface org.apache.hadoop.hdfs.protocol.ClientProtocol
+    Class<FailoverProxyProvider<T>> failoverProxyProviderClass =
+        getFailoverProxyProviderClass(conf, nameNodeUri, xface);
+  
+    if (failoverProxyProviderClass == null) {
+      // Non-HA case
+      return createNonHAProxy(conf, NameNode.getAddress(nameNodeUri), xface,
+          UserGroupInformation.getCurrentUser(), true);
+	}
+}
+
+
+/* RPC.java */
+static synchronized RpcEngine getProtocolEngine(Class<?> protocol,
+      Configuration conf) {
+    RpcEngine engine = PROTOCOL_ENGINES.get(protocol);
+    if (engine == null) {
+      Class<?> impl = conf.getClass(ENGINE_PROP+"."+protocol.getName(),
+                                    WritableRpcEngine.class);
+      engine = (RpcEngine)ReflectionUtils.newInstance(impl, conf);
+      PROTOCOL_ENGINES.put(protocol, engine);
+    }
+    return engine;
+}
+
+return getProtocolEngine(protocol,conf).getProxy(protocol, clientVersion,
+        addr, ticket, conf, factory, rpcTimeout, connectionRetryPolicy);
+		
+protocol:interface org.apache.hadoop.hdfs.protocolPB.ClientNamenodeProtocolPB
+
+Class<?> impl = conf.getClass(ENGINE_PROP+"."+protocol.getName(),
+                                    WritableRpcEngine.class);
+class org.apache.hadoop.ipc.ProtobufRpcEngine
+
+最后在DFSClient构造函数中，this.namenode = proxyInfo.getProxy();
+
+
+
+org.apache.hadoop.ipc.ProtobufRpcEngine.Invoker
+
+
+TextInputFormat如何处理跨split的行:
+1、总是是从buffer里读取数据,如果buffer里的数据读完了,先加载下一批数据到buffer
+在buffer中查找"行尾",将开始位置至行尾处的数据拷贝给str(也就是最后的Value).如果为遇到"行尾",继续加载新的数据到buffer进行查找.
+关键点在于:给到buffer的数据是直接从文件中读取的,完全不会考虑是否超过了split的界限,而是一直读取到当前行结束为止。
+2、按照readLine的上述行为,在遇到跨split的行时,会到下一个split继续读取数据直至行尾,那么下一个split怎么判定开头的一行有没有被上一个split的LineRecordReader读取过从而避免漏读或重复读取开头一行呢?这方面LineRecordReader使用了一个简单而巧妙的方法:既然无法断定每一个split开始的一行是独立的一行还是被切断的一行的一部分,那就跳过每个split的开始一行(当然要除第一个split之外),从第二行开始读取,然后在到达split的结尾端时总是再多读一行,这样数据既能接续起来又避开了断行带来的麻烦

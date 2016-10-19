@@ -1,0 +1,9 @@
+ANT_HOME=D:\dev\apache-ant-1.9.7
+GRADLE_HOME=D:\dev\gradle-3.0
+JAVA_HOME=C:\Program Files\Java\jdk1.7.0_21
+MAVEN_HOME=D:\apache-maven-3.3.9
+NODE_PATH=D:\dev\nodejs\node_modules
+
+CLASSPATH=.;%JAVA_HOME%\lib\dt.jar;%JAVA_HOME%\lib\tools.jar;C:\PROGRA~1\IBM\SQLLIB\java\db2java.zip;C:\PROGRA~1\IBM\SQLLIB\java\db2jcc.jar;C:\PROGRA~1\IBM\SQLLIB\java\sqlj.zip;C:\PROGRA~1\IBM\SQLLIB\java\db2jcc_license_cu.jar;C:\PROGRA~1\IBM\SQLLIB\bin;C:\PROGRA~1\IBM\SQLLIB\java\common.jar
+
+path=%java_home%\bin;%systemroot%\system32;%systemroot%;%systemroot%\system32\wbem;%systemroot%\system32\windowspowershell\v1.0\;c:\program files\widcomm\bluetooth software\;c:\program files\widcomm\bluetooth software\syswow64;c:\program files (x86)\visualsvn\bin;%maven_home%\bin;c:\program files\ibm\gsk8\lib64;c:\program files (x86)\ibm\gsk8\lib;C:\PROGRA~1\IBM\SQLLIB\BIN;C:\PROGRA~1\IBM\SQLLIB\FUNCTION;C:\PROGRA~1\IBM\SQLLIB\SAMPLES\REPL;C:\Program Files (x86)\Lenovo\Access Connections\;C:\Program Files\VanDyke Software\Clients\;$HADOOP_HOME\bin;D:\Python34\;D:\Python34\Scripts\;D:\Python34\Lib\site-packages\django\bin\;%ANDROID_HOME%\platform-tools;%ANT_HOME%\bin;%GRADLE_HOME%\bin;%NODE_PATH%;D:\dev\nodejs;C:\Program Files (x86)\Subversion\bin;C:\Program Files\TortoiseSVN\bin;C:\Program Files\Git\cmd;

@@ -1,0 +1,7 @@
+svn import -m "oa first" oa svn://localhost/oa  
+svn checkout svn svn://localhost/oa  
+svn add web\login.html
+svn commit -m "01 modify"
+svn update
+
+svn import -m "wx-chat first commit" wx-chat https://10.68.117.101/svn/ITSM/source/trunk/wx-chat

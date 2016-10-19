@@ -1,0 +1,597 @@
+1、不支持并发写入：一个文件分8块，不能同时写8块，只能一块一块的写。为什么不是所有reducer的结果写入同一个HDFS文件呢? 显然, 多个reducer对同一文件执行写操作,即多个writer同时向HDFS的同一文件执行写操作, 这需要昂贵的同步机制不说, 最重要的是这种做法将各reducer的写操作顺序化, 不利于各reduce任务的并行。 因此, HDFS没有必要支持多个writer, 单个writer就可以满足Hadoop的需要。
+2、不支持小文件：太多小文件的元数据信息太大，对NameNode压力太大。
+
+MapReduce类型转换：
+	map:(k1, v1) -> list(k2, v2)
+	combiner:(k2, list(v2)) -> list(k2, v2)
+	reduce:(k2, list(v2)) -> list(k3, v3)
+	partition:(k2, v2) -> integer
+
+Hadoop权威指南（第四版）读书笔记
+Chapter 2 MapReduce	每一个reduce的output都是一个HDFS块。第一个副本存储在本地当前NODE，其他副本为了可靠性存储在其他机架上的NODE上。因此，写入reduce的output需要消耗网络带宽，但是只有一个正常HDFS的管道消耗。
+
+
+http://archive.apache.org/dist
+http://releases.ubuntu.com/12.04/
+
+C:\Windows\System32\drivers\etc\hosts
+
+hadoop fs -put words hdfs://hadoop1:9000/words
+hadoop fs -get words hdfs://hadoop1:9000/words
+hadoop fs -ls words hdfs://hadoop1:9000/
+hadoop jar hadoop-mapreduce-examples-2.2.0.jar wordcount hdfs://hadoop1:9000/words hdfs://hadoop1:9000/wcout
+
+scp -r core-site.xml hdfs-site.xml hadoop01:/root/hbase-0.96/conf/
+
+HBASE   //hadoop01:60010
+
+nameNode:hadoop01
+resourceManager:hadoop02
+zk JournalNode:hadoop03
+
+#安装分布式虚拟机
+1、使用 Host-only 网络连接类型后，主机依然可以通过真实网关正常上网。
+2、不但要关闭虚拟机的防火墙，还要关闭主机的防火墙，否则虚拟机不能ping通主机。
+3、在设置主机或虚拟机IP时，要注意不能超出“Virtual Network Editor”中对应连接类型的“DHCP Settings”中的Start IP 和 End IP的范围。
+4、如果虚拟机在运行时切换了网络连接类型并重新设置IP后，必须将虚拟机网络重启才能生效，
+
+#克隆一个hadoop镜像后，需要修改内容：
+1、修改主机名
+		vim /etc/sysconfig/network
+		
+		NETWORKING=yes 
+		HOSTNAME=hadoop01    ###
+
+2、修改IP
+		两种方式：
+		第一种：通过Linux图形界面进行修改（强烈推荐）
+			进入Linux图形界面 -> 右键点击右上方的两个小电脑 -> 点击Edit connections -> 选中当前网络System eth0 -> 点击edit按钮 -> 选择IPv4 -> method选择为manual -> 点击add按钮 -> 添加IP：192.168.1.119 子网掩码：255.255.255.0 网关：192.168.1.1 -> apply
+	
+		第二种：修改配置文件方式（屌丝程序猿专用）
+			vim /etc/sysconfig/network-scripts/ifcfg-eth0
+			
+			DEVICE="eth0"
+			BOOTPROTO="static"           ###
+			HWADDR="00:0C:29:3C:BF:E7"
+			IPV6INIT="yes"
+			NM_CONTROLLED="yes"
+			ONBOOT="yes"
+			TYPE="Ethernet"
+			UUID="ce22eeca-ecde-4536-8cc2-ef0dc36d4a8c"
+			IPADDR="192.168.8.88"       ###
+			NETMASK="255.255.255.0"      ###
+			GATEWAY="192.168.1.1"        ###
+
+3、修改主机名和IP的映射关系
+		vim /etc/hosts
+			
+		192.168.8.88	hadoop01
+4、每台机器上都要增加新增机器的主机名和IP对应关系，一台机器增加一行
+		vim /etc/hosts
+		
+4、重启机器
+
+5、修改windows的hosts文件
+	C:\Windows\System32\drivers\etc\hosts
+	
+集群启动成功后各节点进程：
+[root@hadoop01 work]# jps
+4876 DFSZKFailoverController
+4617 NameNode
+4949 Jps
+
+[root@hadoop02 ~]# jps
+3847 DFSZKFailoverController
+3755 NameNode
+3929 Jps
+
+[root@hadoop03 hadoop]# jps
+4614 QuorumPeerMain
+4666 JournalNode
+4739 DataNode
+5365 ResourceManager
+4853 NodeManager
+4975 Jps
+
+[root@hadoop04 bin]# jps
+4614 QuorumPeerMain
+4666 JournalNode
+4739 DataNode
+4853 NodeManager
+4975 Jps
+
+File /profile._COPYING_ could only be replicated to 0 nodes instead of minReplication (=1) There are 1 datanode(s) running and no node(s) are excluded in this operation
+http://stackoverflow.com/questions/27204490/could-only-be-replicated-to-0-nodes-instead-of-minreplication-1
+http://tieba.baidu.com/p/2956729062
+#hadoop问题汇总
+1、Permanently added the RSA host key for IP address '192.168.8.88' to the list of known hosts
+   表示在known_hosts里已经有一台server和你正要访问的server的IP冲突。
+   ssh-keygen -R 192.168.8.88
+2、启动hive前，要先启动mysql所在机器上的hadoop服务 start-all.sh
+2、java.lang.NoSuchMethodException: Hadoop_FPTree$SumMapper.<init>()
+	 Mapper和Reducer作为内部类必须是静态static的。另外，他们可以作为同级的类。
+3、org.apache.hadoop.io.LongWritable cannot be cast to org.apache.hadoop.io.IntWritable
+	 Mapper默认的输入是 <位置 文本值> 位置时候LongWritable类型
+4、FATAL org.apache.hadoop.ha.ZKFailoverController: Unable to start failover controller. Parent znode does not exist.
+	这个错误导致启动不了DFSZKFailoverController，从而不能选举出Active。 Node，导致了Hadoop两个NameNode都是Standby，我是这样做的，停掉Hadoop所有进程，然后重新格式化Zookeeper：hdfs zkfc -formatZK　　
+5、could only be replicated to 0 nodes instead of minReplication (=1) There are 1 datanode(s)
+	cat /root/work/hadoop-2.2.0/namedatanode/namenode/current/VERSION
+	cat /root/work/hadoop-2.2.0/namedatanode/datanode/current/VERSION
+	vim /root/work/hadoop-2.2.0/namedatanode/namenode/current/VERSION
+	hadoop04,hadoop05,hadoop06:
+	cat /root/work/hadoop-2.2.0/tmp/dfs/data/current/VERSION
+	
+	cp -rf /root/work/hadoop-2.2.0/namedatanode/datanode/current/VERSION /root/work/hadoop-2.2.0/tmp/dfs/data/current/
+
+#zookeeper问题汇总
+1、./start.sh看见启动成功了，有输出。但是输入jps查看的时候，会发现没有QuorumPeerMain 进程。说明没有启动成功。
+	首先知道交互式shell和非交互式shell、登录shell和非登录shell是有区别的
+	在登录shell里，环境信息需要读取/etc/profile和~ /.bash_profile, ~/.bash_login, and ~/.profile按顺序最先的一个，并执行其中的命令。除非被 —noprofile选项禁止了；在非登录shell里，环境信息只读取 /etc/bash.bashrc和~/.bashrc 
+	手工执行是属于登陆shell，脚本执行数据非登陆shell，而我的linux环境配置中只对/etc/profile进行了jdk1.6等环境的配
+	置，所以脚本执行/usr/local/zookeeper3.4/bin/zkServer.sh start 启动zookeeper失败了
+	解决方法
+	把profile的配置信息echo到.bashrc中 
+	vim /root/.bashrc
+	echo 'source /etc/profile' >> ~/.bashrc
+	在/zookeeper/bin/zkEnv.sh的中开始位置添加 export JAVA_HOME=/usr/local/jdk1.6（就像hadoop中对hadoop-env.sh的配置一样）
+	在 hadoop03,hadoop04 上，vim /root/work/zookeeper-3.4.5/bin/zkEnv.sh 增加 export JAVA_HOME=/root/work/jdk1.7.0_04
+	在 hadoop03,hadoop04 上，执行 echo 'source /etc/profile' >> ~/.bashrc
+	
+1、Opening socket connection to server localhost/0:0:0:0:0:0:0:1:2181 
+	检查 conf/zoo.cfg，server.1、server.2、server.3...，这些机器是否都存在并全部启动，对没有启动的机器注释。
+
+http://bbs.51cto.com/thread-1146330-1.html
+http://download.csdn.net/download/hadoopgege/8324409
+
+http://archive.apache.org/dist/hadoop/core/hadoop-2.2.0/
+
+(1)安装Hadoop相关组件
+#版本配套选择：
+hadoop 0.20.x – hbase 0.92 – hive 0.9 – pig 0.10 – zookeeper-3.3.4 – jdk 1.7.0
+
+#安装Hadoop:
+su - hadoop
+cd /home/zm/work/hadoop
+sudo tar zxvf hadoop-0.20.2-CDH3B4.tar.gz
+sudo mv hadoop-0.20.2-CDH3B4 hadoop
+sudo chown -R hadoop:hadoop hadoop
+export HADOOP_HOME=/home/zm/work/hadoop/hadoop
+export PATH=$PATH:$HADOOP_HOME/bin
+#参照conf文件夹下文件修改对应的配置文件
+#测试Hadoop安装配置
+$HADOOP_HOME/bin/hadoop version
+#配置SSH
+sudo apt-get install ssh
+ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+#测试SSH
+ssh localhost
+#格式化HDFS文件系统
+su - hadoop
+$HADOOP_HOME/bin/hadoop namenode -format
+#启动守护进程
+$HADOOP_HOME/bin/start-all.sh
+$HADOOP_HOME/bin/start-mapred.sh
+#停止守护进程
+$HADOOP_HOME/bin/stop-all.sh
+$HADOOP_HOME/bin/stop-mapred.sh
+#测试是否启动成功，如果成功打开了，说明安装成功了
+http://localhost:50030/ #Hadoop 管理介面
+http://localhost:50060/ #Hadoop Task Tracker 状态
+http://localhost:50070/ #Hadoop DFS 状态
+jps
+
+#运行了一个application——grep，一个单词计数器
+$HADOOP_HOME/bin/hadoop fs -rmr output
+$HADOOP_HOME/bin/hadoop fs -put conf input
+$HADOOP_HOME/bin/hadoop jar /home/zm/work/hadoop/hadoop/hadoop-examples-0.20.2-CDH3B4.jar grep input output 'dfs[a-z.]+'
+
+#安装ZooKeeper:
+cd /home/zm/work/hadoop
+sudo tar zxvf zookeeper-3.4.5.tar.gz
+sudo mv zookeeper-3.4.5 zookeeper
+sudo chmod -R 777 zookeeper
+export ZOOKEEPER_HOME=/home/zm/work/hadoop/zookeeper
+export PATH=$PATH:$ZOOKEEPER_HOME/bin:$ZOOKEEPER_HOME/conf
+sudo mkdir zookeeper/data
+sudo chmod -R 777 zookeeper/data
+sudo mkdir zookeeper/logs
+sudo chmod -R 777 zookeeper/logs
+#参照conf文件夹下文件修改对应的配置文件
+#启动本地ZooKeeper服务
+$ZOOKEEPER_HOME/bin/zkServer.sh start
+#测试
+$echo ruok | nc localhost 2181
+imok
+#停止本地ZooKeeper服务
+$ZOOKEEPER_HOME/bin/zkServer.sh stop
+
+#安装Hbase:
+cd /home/zm/work/hadoop
+sudo tar zxvf hbase-0.94.2.tar.gz
+sudo mv hbase-0.94.2 hbase
+sudo chmod -R 777 hbase
+export HBASE_HOME=/home/zm/work/hadoop/hbase
+export PATH=$PATH:$HBASE_HOME/bin
+sudo mkdir hbase/data
+sudo chmod -R 777 hbase/data
+#参照conf文件夹下文件修改对应的配置文件
+#启动守护进程
+$HBASE_HOME/bin/start-hbase.sh
+#停止守护进程
+$HBASE_HOME/bin/stop-hbase.sh
+#启动Hbase外壳环境
+$HBASE_HOME/bin/hbase shell
+#创建表
+create 'test', 'data'
+
+#安装Pig:
+cd /home/zm/work/hadoop
+sudo tar zxvf pig-0.10.0.tar.gz
+sudo mv pig-0.10.0 pig
+sudo chmod -R 777 pig
+export PIG_HOME=/home/zm/work/hadoop/pig
+export PATH=$PATH:$PIG_HOME/bin
+cd /home/zm/work/hadoop/pig/bin
+sudo ./pig -help
+export PIG_HADOOP_VERSION=22
+export PIG_CLASSPATH=$HADOOP_HOME/conf
+
+#安装Hive:
+cd /home/zm/work/hadoop
+sudo tar zxvf hive-0.9.0.tar.gz
+sudo mv hive-0.9.0 hive
+sudo chmod -R 777 hive
+export HIVE_HOME=/home/zm/work/hadoop/hive
+export PATH=$PATH:$HIVE_HOME/bin
+#在$HADOOP_HOME/目录下建立名叫hive的软链接，命令如下：
+cd $HADOOP_HOME
+ln -s /home/zm/work/hadoop/hive hive
+#建立Hive仓库目录
+$HADOOP_HOME/bin/hadoop fs -mkdir /tmp
+$HADOOP_HOME/bin/hadoop fs -mkdir /user/hive/warehouse
+$HADOOP_HOME/bin/hadoop fs -chmod g+w /tmp
+$HADOOP_HOME/bin/hadoop fs -chmod g+w /user/hive/warehouse
+#在$HIVE_HOME/conf目录下，新建一个hive-site.xml，配置Hive元数据的存储方式，采用mysql
+#把数据库驱动拷贝到$HIVE_HOME/lib/下
+#启动Hive外壳环境
+$HIVE_HOME/bin/hive
+hive>set javax.jdo.option.ConnectionURL;
+hive> SHOW TABLES;
+hive> SELECT * FROM TAB1;
+hive> SELECT COUNT(1) FROM TAB1;
+#启用HWI
+hadoop@zm-ruanjian:/home/zm/work/hadoop$ export ANT_LIB=/path/to/ant/lib
+hadoop@zm-ruanjian:/home/zm/work/hadoop$ hive --service hwi
+#浏览器访问 http://localhost:9999/hwi/ ， 查看Hive数据库模式
+
+#安装Sqoop:
+cd /home/zm/work/hadoop
+sudo tar zxvf sqoop-1.2.0-CDH3B4.tar.gz
+sudo mv sqoop-1.2.0-CDH3B4 sqoop
+sudo chmod -R 777 sqoop
+export SQOOP_HOME=/home/zm/work/hadoop/sqoop
+export PATH=$PATH:$SQOOP_HOME/bin
+$SQOOP_HOME/bin/sqoop
+#将 $HADOOP_HOME 目录下的 hadoop-core-0.20.2-CDH3B4.jar拷贝到 $SQOOP_HOME/bin 目录下
+#将数据库驱动JAR拷贝到 $SQOOP_HOME/lib 目录下，并执行 chmod he chown 命令修改JAR权限
+
+#1)列出mysql数据库中的所有数据库命令
+$SQOOP_HOME/bin/sqoop list-databases --connect jdbc:mysql://localhost:3306/ --username root --password root
+
+#2)连接mysql并列出数据库中的表命令
+$SQOOP_HOME/bin/sqoop list-tables --connect jdbc:mysql://localhost:3306/test --username root --password root
+
+#3)将关系型数据的表结构复制到hive中
+$SQOOP_HOME/bin/sqoop create-hive-table --connect jdbc:mysql://localhost:3306/test --table emp --username root --password root --hive-table hemp
+#其中 --table username为mysql中的数据库test中的表   --hive-table test 为hive中新建的表名称
+  
+#4)从关系数据库导入文件到hive中
+$HADOOP_HOME/bin/hadoop fs -rmr /user/hadoop/widgets
+$SQOOP_HOME/bin/sqoop import --connect jdbc:mysql://localhost:3306/hive --username root --password root \
+	--table widgets -m 1 --hive-import --hive-table widgets --input-fields-terminated-by '\t' #--hive-overwrite
+$HADOOP_HOME/bin/hadoop fs -ls /user/hadoop/widgets
+$HADOOP_HOME/bin/hadoop fs -cat /user/hadoop/T_S_P_ROLE/part-m-00000
+
+#6)将hive中的表数据导入到mysql中
+$SQOOP_HOME/bin/sqoop export --connect jdbc:mysql://localhost:3306/test --username root --password admin --table uv_info --export-dir /user/hive/warehouse/uv/dt=2011-08-03
+
+#最后执行
+cd /home/zm/work/hadoop
+sudo chown -R hadoop:hadoop *
+sudo chmod -R 777 *
+
+#修改 /etc/hosts 文件， 127.0.1.1 改成 127.0.0.1
+
+#start-all.sh 文件启动完成后的进程：
+hadoop@zm-ruanjian:/home/zm/work/hadoop$ jps
+3944 DataNode
+5540 HRegionServer
+5070 QuorumPeerMain
+4255 JobTracker
+4169 SecondaryNameNode
+4487 TaskTracker
+19973 Jps
+3723 NameNode
+5279 HMaster
+
+
+cd /home/zm/work/hadoop/hadoop
+./bin/start-all.sh
+./bin/start-mapred.sh
+bin/hadoop fs -copyFromLocal /home/zm/work/eclipse3.7/workspace/hadoop/ncdc/input hdfs://localhost:9000/user/input
+
+
+本地模式:
+cd /home/zm/work/hadoop/pig/bin
+./pig -x local
+
+records = LOAD '/home/zm/work/eclipse3.7/workspace/hadoop/hadoopguide2/input/ncdc/micro-tab/sample.txt' AS (year:chararray, temperature:int, quality:int);
+
+# max_temp.pig: Finds the maximum temperature by year
+records = LOAD 'input/ncdc/micro-tab/sample.txt'
+  AS (year:chararray, temperature:int, quality:int);
+filtered_records = FILTER records BY temperature != 9999 AND
+  (quality == 0 OR quality == 1 OR quality == 4 OR quality == 5 OR quality == 9);
+grouped_records = GROUP filtered_records BY year;
+max_temp = FOREACH grouped_records GENERATE group,
+  MAX(filtered_records.temperature);
+DUMP max_temp;
+
+Hadoop=HDFS（文件系统，数据存储技术相关）+HBase（数据库）+MapReduce（数据处理）
+HDFS:分布式文件存储系统
+HBase:及分布式数据库
+MapReduce:一种简化的分布式编程模式
+Hive:基于Hadoop的一个数据仓库工具，处理能力强而且成本低廉
+
+sudo gedit /etc/environment
+
+sudo -u hadoop hadoop fs -mkdir
+$HADOOP_HOME/bin/hadoop fs –put ~/file /user/hadoop/
+$HADOOP_HOME/bin/hadoop fs –put /home/zm/work/hbasedir/b.sh b.sh
+$HADOOP_HOME/bin/hadoop fs -ls                                              #列出HDFS文件 
+$HADOOP_HOME/bin/hadoop fs -ls file:///home/                                #列出本地文件 
+$HADOOP_HOME/bin/hadoop fs –ls input                                        #列出HDFS目录下某个文档中的文件
+$HADOOP_HOME/bin/hadoop fs -mkdir /user/hadoop/books                        #创建HDFS文件夹
+$HADOOP_HOME/bin/hadoop fs –rmr /user/hadoop/books                          #删除HDFS下的文件或文件夹 
+$HADOOP_HOME/bin/hadoop fs -copyFromLocal a.txt aa.txt                      #拷贝本地文件到HDFS
+$HADOOP_HOME/bin/hadoop fs -copyToLocal aa.txt aaa.txt                      #拷贝本地文件到HDFS
+$HADOOP_HOME/bin/hadoop fs -cp aa.txt /user/hadoop/books                    #拷贝HDFS文件到其它HDFS目录
+$HADOOP_HOME/bin/hadoop fs -du URI [URI …]                                  #显示目录中所有文件的大小
+$HADOOP_HOME/bin/hadoop fs -getmerge <src> <localdst> [addnl]               #合并文件到本地目录
+$HADOOP_HOME/bin/hadoop fs -cat file:///file3 /user/hadoop/file4            #将路径指定文件的内容输出到stdout
+$HADOOP_HOME/bin/hadoop fs -chgrp [-R] GROUP URI                            #改变文件的所属组
+$HADOOP_HOME/bin/hadoop fs -chmod [-R] 755 URI                              #改变用户访问权限
+$HADOOP_HOME/bin/hadoop fs -chown [-R] [OWNER][:[GROUP]] URI [URI ]         #修改文件的所有者
+
+Hive:
+hive> CREATE TABLE pokes (foo INT, bar STRING);
+#创建表并创建索引字段ds
+hive> CREATE TABLE invites (foo INT, bar STRING) PARTITIONED BY (ds STRING);
+#显示所有表 
+hive> SHOW TABLES; 
+
+###第15章 Sqoop
+#1、创建一个新的MySql数据库模式
+zm@zm-ruanjian:~$ mysql -u root -p
+mysql> create database hive;
+mysql> grant all privileges on hive.* to '%'@'localhost';
+mysql> grant all privileges on hive.* to ''@'localhost';
+mysql> quit;
+#2、填充MySql数据库
+zm@zm-ruanjian:~$ mysql hive;
+mysql> create table widgets(id int not null primary key auto_increment, widget_name varchar(64) not null, price decimal(10,2), design_date date, version int, design_comment varchar(100));
+mysql> insert into widgets values(null, 'sprocket', 0.25, '2010-02-10', 1, 'Connects two gizmos');
+mysql> insert into widgets values(null, 'gizmo', 4.00, '2009-11-30', 4, null);
+mysql> insert into widgets values(null, 'gadget', 99.99, '1983-08-13', 13, 'Our flagship product');
+mysql> quit;
+
+#3、widgets表数据从关系数据库MySql导入到hive中
+$HADOOP_HOME/bin/hadoop fs -rmr /user/hadoop/widgets
+$SQOOP_HOME/bin/sqoop import --connect jdbc:mysql://localhost:3306/hive --username root --password root \
+	--table widgets -m 1 --hive-import --hive-table widgets --input-fields-terminated-by '\t' #--hive-overwrite
+$HADOOP_HOME/bin/hadoop fs -ls /user/hadoop/widgets
+$HADOOP_HOME/bin/hadoop fs -cat /user/hadoop/T_S_P_ROLE/part-m-00000
+
+#4、创建sales表，并从文件中数据导入hive中
+hive> create table sales(widget_id int, qty int, street string, city string, state string, zip int, sale_date string) row format delimited fields terminated by ',';
+hive> load data local inpath "/home/zm/work/hadoop/hadoop_study/sales.log" into table sales;
+#5、创建关联查询结果表zip_profits
+hive> create table zip_profits (sales_vol double, zip int);
+hive> insert overwrite table zip_profits select sum(w.price * s.qty) as sales_vol, s.zip from sales s join widgets w on (s.widget_id = w.id) group by s.zip;
+hive> select * from zip_profits order by sales_vol desc;
+
+#导出
+mysql hive
+create table sales_by_zip (volume decimal(8, 2), zip integer);
+
+#$SQOOP_HOME/bin/sqoop export --connect jdbc:mysql://localhost:3306/hive --username root -m 1 --password root \
+	--table sales_by_zip --export-dir /home/hadoop/
+
+
+(5)QA
+Q:ERROR hdfs.DFSClient: Exception closing file /user/hadoop/a.sh : java.io.IOException: File /user/hadoop/a.sh could only be replicated to 0 nodes, instead of 1
+A:datanode守护进程没有起来
+
+Q:PleaseHoldException: Master is initializing
+A:出现这种情形，请检查/etc/hosts文件，把
+127.0.1.1 ubuntu
+改成
+127.0.0.1 ubuntu
+之后重新启动Hbase就可以正常运行了。
+
+
+
+以前记录
+/**HADOOP*********************************************************************************************/
+http://blog.nosqlfan.com
+http://book.douban.com/subject/4817792/
+http://www.hadoopor.com/
+http://bbs.chinacloud.cn/showforum-16.aspx
+http://www.slideshare.net/LiZhenHua/eclipsehadoop
+http://bbs.chinacloud.cn/showtopic-4314.aspx
+http://bbs.chinacloud.cn/showtopic-7138.aspx
+http://wenku.baidu.com/view/7a63c902b52acfc789ebc9a2.html
+http://hadoop.apache.org/common/docs/r0.19.2/cn/quickstart.html
+Eclipse下配置hadoop环境 :
+http://blog.csdn.net/lmc_wy/article/details/6053580
+
+Hadoop环境搭建――单节点篇：
+http://freewxy.iteye.com/blog/1027569
+	sudo su - hadoop
+	cd /usr/local/hadoop
+	sudo rm -r /home/hadoop/tmp
+	./bin/hadoop namenode -format
+	./bin/start-all.sh
+	./bin/start-mapred.sh
+	#访问http://localhost:50030,http://localhost:50070，如果成功打开了，说明安装成功了
+	jps
+	bin/hadoop dfs -copyFromLocal /home/zm/work/test.txt firstTest
+	bin/hadoop jar hadoop-mapred-examples-0.22.0.jar wordcount firstTest result
+	bin/hadoop dfs -cat result/part-r-00000
+
+Hadoop 集群运行测试代码（Hadoop 权威指南天气数据示例）:
+http://blog.csdn.net/lmc_wy/article/details/6053580
+
+http://www.linuxidc.com/Linux/2012-02/54593.htm
+http://www.cnblogs.com/LeftNotEasy/archive/2011/08/27/why-map-reduce-must-be-future-of-distributed-computing.html
+http://blog.csdn.net/lmc_wy/article/details/6053580
+
+HBase:
+http://www.yankay.com/wp-content/hbase/book.html#getting_started
+http://hi.baidu.com/baixuejiyi1111/blog/item/65ff278d14603803c9fc7a12.html
+
+Hive:
+http://www.iteye.com/news/11024
+http://www.360doc.com/content/11/0212/10/2459_92341146.shtml
+
+常用命令：
+hadoop@rj-zengming:/usr/local/hadoop/bin$ ./hadoop fsck / -files -blocks
+NN482-38183-J8WYA-AT12H-AXCM0
+HJ090-3814L-N8MY2-A8AUK-35V64
+
+hadoop@rj-zengming:/usr/local/hbase-0.90.5/bin$ jps
+18976 Jps
+15487 NameNode
+5193 QuorumPeerMain
+10277 HRegionServer
+15751 DataNode
+16014 SecondaryNameNode
+18641 RunJar
+16347 TaskTracker
+16094 JobTracker
+
+
+二、启动运行环境
+1启动Hive
+hadoop@rj-zengming:/usr/local/hive-0.8.1/bin$ ./hive -hiveconf hbase.master=master:9000
+2启动HBase
+/work/hbase/bin/hbase master start
+3启动Zookeeper
+/work/zookeeper/bin/zkServer.sh start
+4见表
+CREATE TABLE hbase_table_1(key int, value string) STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler' WITH SERDEPROPERTIES ("hbase.columns.mapping" = ":key,cf1:val") TBLPROPERTIES ("hbase.table.name" = "xyz");
+
+查看Hadoop配置信息：
+http://localhost:60010/master.jsp
+NameNode – http://localhost:50070/
+JobTracker – http://localhost:50030/
+
+Sqoop:
+su hadoop
+cd /usr/local/hadoop/bin
+./start-all.sh
+cd /usr/local/hbase-0.90.5/bin
+./start-hbase.sh
+cd /usr/local/sqoop-1.2.0-CDH3B4/bin
+
+./sqoop import --driver com.ibm.db2.jcc.DB2Driver --connect jdbc:db2://192.168.0.202:50000/WLTESTDB --username wl --password 1 --table TE_QTY_UNIT_BAK -m 1
+
+./sqoop import --driver com.ibm.db2.jcc.DB2Driver --connect jdbc:db2://192.168.0.202:50000/WLTESTDB --username wl --password 1 --table TE_QTY_UNIT_BAK -m 1 --hbase-create-table --hbase-table tab6 --column-family INFO --hbase-row-key ID
+
+./sqoop import --driver com.ibm.db2.jcc.DB2Driver --connect jdbc:db2://192.168.0.202:50000/BPFDB --username hbyc --password 1 --table T_B_CIG_INFO -m 1 --hbase-create-table --hbase-table tab9 --column-family INFO --hbase-row-key CIG_CODE
+
+http://www.cnblogs.com/yanlingyin/archive/2012/02/15/thinkingincache.html
+
+hive --auxpath /data/soft/hive/lib/hive_hbase-handler.jar,/data/soft/hive/lib/hbase-0.20.3.jar,/data/soft/hive/lib/zookeeper-3.2.2.jar  -hiveconf hbase.zookeeper.quorum=slave-001,slave-002,slave-003
+
+CREATE TABLE hbase_table_2(key int, value string) STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler' WITH SERDEPROPERTIES ("hbase.columns.mapping" = ":key,cf1:val") TBLPROPERTIES ("hbase.table.name" = "xyz");
+
+Hive:
+./hive --auxpath /usr/local/hive-0.8.1/lib/hive-hbase-handler-0.8.1.jar,/usr/local/hive-0.8.1/lib/hbase-0.90.5.jar,/usr/local/hive-0.8.1/lib/zookeeper-3.3.1.jar -hiveconf hbase.master=localhost:9000
+
+CREATE EXTERNAL TABLE hbase_table_2(key string, value string) STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler' WITH SERDEPROPERTIES ("hbase.columns.mapping" = "data:1") TBLPROPERTIES("hbase.table.name" = "test");
+
+CREATE EXTERNAL TABLE hbase_table_2(key string, value string) STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler' WITH SERDEPROPERTIES ("hbase.columns.mapping"="data:1") TBLPROPERTIES("hbase.table.name" = "test");
+
+http://blog.sina.com.cn/s/blog_410d18710100vkhs.html
+
+CREATE TABLE hbase_table_1(key int, value string)
+STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler'
+WITH SERDEPROPERTIES ("hbase.columns.mapping" = ":key,cf1:val")
+TBLPROPERTIES ("hbase.table.name" = "xyz");
+
+
+CREATE TABLE hbase_table_1(key int, value string) STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler' WITH SERDEPROPERTIES ("hbase.columns.mapping" = ":key,cf1:val") TBLPROPERTIES ("hbase.table.name" = "xyz");
+
+./hive -hiveconf hbase.master=master:9000
+
+LOAD DATA LOCAL INPATH '/usr/local/hive-0.8.1/examples/files/kv1.txt' OVERWRITE INTO TABLE pokes;
+
+INSERT OVERWRITE TABLE hbase_table_1 SELECT * FROM pokes WHERE foo=98;
+
+Hive HBase 整合:(http://running.iteye.com/blog/898399)
+--打开终端一
+zm@rj-zengming:~$ su hadoop
+hadoop@rj-zengming:/home/zm$ cd /usr/local/hadoop/bin
+hadoop@rj-zengming:/usr/local/hadoop/bin$ ./start-all.sh
+hadoop@rj-zengming:/usr/local/hadoop/bin$ jps
+5113 NameNode
+5620 SecondaryNameNode
+5364 DataNode
+5714 JobTracker
+5969 TaskTracker
+6025 Jps
+
+hadoop@rj-zengming:/usr/local/hbase-0.90.5/bin$ cd /usr/local/zookeeper-3.4.3/bin
+hadoop@rj-zengming:/usr/local/zookeeper-3.4.3/bin$ ./zkServer.sh start
+
+hadoop@rj-zengming:/usr/local/hadoop/bin$ cd /usr/local/hbase-0.90.5/bin
+hadoop@rj-zengming:/usr/local/hbase-0.90.5/bin$ ./hbase master start
+hadoop@rj-zengming:/usr/local/hbase-0.90.5/bin$ ./start-hbase.sh
+
+--打开终端二
+hadoop@rj-zengming:/usr/local/hbase-0.90.5/bin$ cd /usr/local/hive-0.8.1/bin
+hadoop@rj-zengming:/usr/local/hive-0.8.1/bin$ ./hive --auxpath /usr/local/hive-0.8.1/lib/hive-hbase-handler-0.8.1.jar,/usr/local/hive-0.8.1/lib/hbase-0.90.5.jar,/usr/local/hive-0.8.1/lib/zookeeper-3.3.1.jar -hiveconf hbase.master=localhost:9000
+hive> CREATE TABLE hbase_table_4(key int, value string) STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler' WITH SERDEPROPERTIES ("hbase.columns.mapping" = ":key,cf1:val") TBLPROPERTIES ("hbase.table.name" = "xyz4");
+hive> CREATE TABLE pokes4 (foo INT, bar STRING);
+hive> LOAD DATA LOCAL INPATH '/usr/local/hive-0.8.1/examples/files/kv1.txt' OVERWRITE INTO TABLE pokes4;
+hive> INSERT OVERWRITE TABLE hbase_table_4 SELECT * FROM pokes4 WHERE foo=98;
+hive> select * from  hbase_table_4;
+
+--打开终端三
+hadoop@rj-zengming:/home/zm$ cd /usr/local/hbase-0.90.5/bin
+hadoop@rj-zengming:/usr/local/hbase-0.90.5/bin$ ./hbase shell
+hbase(main):001:0> describe 'xyz4'
+hbase(main):002:0> scan 'xyz4'
+hbase(main):003:0> put 'xyz4','100','cf1:val','www.360buy.com'
+
+hive> select * from hbase_table_4;
+
+--hive访问已经存在的hbase :
+hive> CREATE EXTERNAL TABLE hbase_table_5(key int, value string) STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler' WITH SERDEPROPERTIES ("hbase.columns.mapping" = "cf1:val") TBLPROPERTIES("hbase.table.name" = "some_existing_table5");
+
+hive> CREATE TABLE hbase_table_6(key int, value1 string, value2 int, value3 int) STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler' WITH SERDEPROPERTIES ("hbase.columns.mapping" = ":key,a:b,a:c,d:e");
+
+INSERT OVERWRITE TABLE hbase_table_6 SELECT foo, bar, foo+1, foo+2 FROM pokes WHERE foo=98 OR foo=100;
+describe "hbase_table_6"
+
+su - db2inst1
+
+HDFS+MapReduce+Hive+HBase十分钟快速入门：http://jeffxie.blog.51cto.com/1365360/317459
+H.E.'s Blog：http://www.javabloger.com/article/2010/11
+
+常见QA：
+jobtracker.info could only be replicated to 0 nodes, instead of 1 错误解决：
+#sudo iptables -I INPUT  -p tcp --dport 9000 -j ACCEPT
+#sudo iptables -I INPUT  -p tcp --dport 9001 -j ACCEPT

@@ -1,0 +1,29 @@
+VM Options:-Xms256m -Xmx1024m -XX:PermSize=250M -XX:MaxPermSize=512m
+-server -XX:PermSize=256M -XX:MaxPermSize=512m
+
+显示文件过滤
+FILE -> SETTINGS -> FILE TYPES -> IGNORE FILES...
+下边是我过滤的类型,区分大小写的
+CVS;SCCS;RCS;rcs;.DS_Store;.svn;.pyc;.pyo;*.pyc;*.pyo;.git;*.hprof;_svn;.sbas;.IJI.*;vssver.scc;vssver2.scc;.*;*.iml;*.ipr;*.iws;*.ids
+
+SVN安装：
+Subversion-1.8.16.msi
+TortoiseSVN-1.8.12.26645-x64-svn-1.8.14.msi
+
+Q:Application Server was not connected before run configuration stop, reason: Unable to ping server at localhost:1099
+A:原因是我tomcat 环境没有配置好.没有指定JAVA_HOME和TOMCAT_HOME。设置IDEA里面的tomcat里的jre路径。
+
+Q:No target specified and no devices found, deploying to emulator
+A:	If you phone is configured for debuggin, disable and enable again.
+
+Q:svn: This client is too old to work with working copy
+A:file-settings-version_control-subversion
+	general->勾选use command line client，将默认值 svn 修改为C:\Program Files (x86)\Subversion\bin\svn.exe
+	同时将project里其他svn有问题的module都先删除，该module的svn就好了
+	
+本地SVN资源库：
+file:///D:\dev\svn\chat-weixin
+file:///D:\dev\svn\chat-app
+
+http://blog.csdn.net/ma929226676/article/details/50970524
+http://blog.csdn.net/u010739551/article/details/51423538

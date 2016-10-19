@@ -1,0 +1,5 @@
+mvn install -DskipTests
+mvn eclipse:eclipse -DdownloadSources=true
+
+--打包
+mvn package -Dmaven.test.skip=true

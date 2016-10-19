@@ -1,0 +1,66 @@
+scala> def max(x:Int,y:Int) = if(x < y) y else x
+max: (x: Int, y: Int)Int
+
+scala> max(11, 22)
+res26: Int = 22
+
+scala> val m = max _
+m: (Int, Int) => Int = <function2>
+
+scala> m(11, 22)
+res28: Int = 22
+
+第五步：运行脚本
+新建 hello.scala 文件，保存到D盘：
+println("Hello, world, from a script!")
+执行结果：
+D:\>scala hello.scala
+Hello, world, from a script!
+
+第六步： 循环用while, 判断用if
+新建 printargs.scala 文件，保存到D盘：
+var i = 0
+while (i < args.length) {
+	println(args(i))
+	i += 1
+}
+
+执行结果：
+D:\>scala printargs.scala Scala is fun
+Scala
+is
+fun
+
+第七步：用foreach和for进行迭代
+新建 printargs.scala 文件，保存到D盘：
+args.foreach((arg: String) => println(arg)) #注意当给变量定义类型的时候，必须要加括号
+
+args.foreach(println)
+
+for (arg <- args) #在Scala，如果一句话是一行，可以省略分号；如果多个语句放在一行，用分号隔开
+println(arg)
+
+执行结果：
+D:\>scala printargs.scala Scala is fun
+Scala
+is
+fun
+
+
+
+第八步： 数组
+val greetStrings = new Array[String](3) #表示类型，可以读成字符串的数组，它是一个类型，也就是类，所以可以用new去实例化
+greetStrings(0) = "Hello"
+greetStrings(1) = ", "
+greetStrings(2) = "world!\n"
+for (i <- 0 to 2) #当for方法参数只有一个的时候，可以不写括号和点
+print(greetStrings(i))
+
+val greetStrings = new Array[String](3)
+greetStrings.update(0, "Hello")
+greetStrings.update(1, ", ")
+greetStrings.update(2, "world!\n")
+for (i <- 0.to(2))
+print(greetStrings.apply(i))
+
+第九步：使用Lists和Tuples

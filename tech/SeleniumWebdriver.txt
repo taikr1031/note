@@ -1,0 +1,51 @@
+Selenium Webdriver 
+火星Alan 11:13:40 
+
+  public static void main(String[] args) {
+
+    GeiWebDriver driver = new GeiWebDriver();
+
+    driver.get(url);
+    String cookieStr = "yundetect_httpport=10000; PANWEB=; bdshare_firstime=; Hm_lvt_eb77799942fcf84785b5626e398e49ab=; Hm_lvt_773fea2ac036979ebb5fcc768d8beb67=; Hm_lvt_adf736c22cd6bcc36a1d27e5af30949e=; BAIDUID=945FE702AE08D113E03CFF9AE7C5C5F9:FG=1; BIDUPSID=945FE702AE08D113E03CFF9AE7C5C5F9; PSTM=1450314945; BDUSS=dSUUZDaFRsS0s5U0UyMWJYfjJIUWJ3Q3luclVGUjhjYXgxSXlGZWl6ellpc3BXQVFBQUFBJCQAAAAAAAAAAAEAAABwrHA9sK64-NPOz7fL2LLE1b4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAANj9olbY~aJWRz";
+    driver.setCookieByStr(cookieStr);
+    driver.navigate().to(url);
+
+    driver.waitUntil(By.id("accessCode"));
+
+    //输入密码
+    WebElement accessCode = driver.findElement(By.id("accessCode"));
+    accessCode.sendKeys(ac_pass);
+    WebElement submitBtn = driver.findElement(By.id("submitBtn"));
+    submitBtn.click();
+
+    //点保存
+    driver.waitUntil(By.id("emphasizeButton"));
+    WebElement emphasizeButton = driver.findElement(By.id("emphasizeButton"));
+    emphasizeButton.click();
+
+    //新建文件夹
+    driver.waitUntil(By.id("_disk_id_15"));
+    WebElement newDirBtn = driver.findElement(By.id("_disk_id_15"));
+    newDirBtn.click();
+
+    //输入业务id
+    driver.waitUntil(By.className("_disk_id_19"));
+    WebElement bId_input = driver.findElement(By.className("_disk_id_19"));
+    bId_input.sendKeys(bId + "123");
+
+    //点确认
+    WebElement sureBtn = driver.findElement(By.className("_disk_id_17"));
+    sureBtn.click();
+
+    //再点确定
+    driver.waitUntil(By.id("_disk_id_14"));
+    WebElement confirmBtn = driver.findElement(By.id("_disk_id_14"));
+    while (confirmBtn.isDisplayed()) {
+      confirmBtn.click();
+      ThreadUtil.sleepSeccond(1);
+      if (confirmBtn.isSelected()) {
+        break;
+      }
+    }
+  } 
+

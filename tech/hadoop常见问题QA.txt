@@ -1,0 +1,18 @@
+Q:	There are 1 missing blocks. Please check the logs or run fsck in order to identify the missing blocks.
+A:	hadoop fsck /
+	hadoop fsck -delete
+	
+Q:	Cannot initialize Cluster. Please check your configuration for mapreduce.framework.name and the correspond server addresses.
+A:	增加JAR: hadoop-mapreduce-client-common
+
+Q:	nohup: failed to run command `java': No such file or directory zookeeper
+A:	对应解决，在每台zookeeper机器上的zkServer.sh文件开头添加如下内容：
+	export JAVA_HOME=/root/work/jdk1.7.0_04
+	export PATH=$JAVA_HOME/bin:$PATH
+	
+Q:	Permission denied: user=dr.who, access=READ_EXECUTE, inode="/tmp":root:super
+A:	hadoop fs -chmod -R 755 /tmp
+
+Q:	could only be replicated to 0 nodes instead of minReplication (=1).  There are 1 datanode(s) running and no node(s) are excluded in this operation
+A:	在NameNode上执行命令：hadoop namenode –format重新格式化HDFS，在格式化之前，需要将你  		NameNode上所配置的dfs.name.dir这一namenode用来存放NameNode 持久存储名字空间及事务日志的本地文件系统路径删除，同时将各DataNode上的dfs.data.dir的路径DataNode存放块数据的本地文件系统路径的目录也删除。
+

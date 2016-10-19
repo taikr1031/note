@@ -1,0 +1,129 @@
+微信公众平台
+https://mp.weixin.qq.com/
+
+WxMpMessageRouter
+
+https://qy.weixin.qq.com
+PID: taikongren1031@163.com
+taikongren
+PW: tai_k_r_1031
+my-team
+myteam
+
+微信测试账号：https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1421137522&token=&lang=zh_CN
+微信号： gh_78b1521f3ce1
+appID：wx791d897f45713b38
+appsecret：ec1be18ba7c332f5ff260c08f3c93e2d    
+URL：http://wechat.whcyit.com/weixin-zm/callback/ff808081550594c0015505a201c70000
+Token：12345678901234567890123456789012
+JS接口安全域名：10.68.19.114:8080
+
+IFANa3agyPSyB3l7FA5-1RZMJtRwRE85TLTOvnBmaQz_C_8r-GLx2FidDOZGi-_Ly3CUZoG8uoHsY0SXncz0LxPVLYqQdEvUhZNBfgYvXH_ZHYb5jClAOp17riTdzQtaTZIfAIAWCL
+
+Connection: close
+Date: Thu, 07 Jul 2016 00:41:41 GMT
+Content-Type: application/json; encoding=utf-8
+Content-Length: 175
+{
+    "access_token": "T8hJg_3udkmTDthQHi4rcaMExODx8u1IUNnVViXsc52Hokai0dz2MVIaulCiSxch1zNoGpGuAIRaZ7HqwhV06Wg5nnzun2jtJUT-vllYwirPdDOa8JR8_aWWQUxOtZqJVQRaAIABWX", 
+    "expires_in": 7199
+}
+Connection: close
+Date: Thu, 07 Jul 2016 00:41:41 GMT
+Content-Type: application/json; encoding=utf-8
+Content-Length: 175
+{
+    "access_token": "T8hJg_3udkmTDthQHi4rcaMExODx8u1IUNnVViXsc52Hokai0dz2MVIaulCiSxch1zNoGpGuAIRaZ7HqwhV06Wg5nnzun2jtJUT-vllYwirPdDOa8JR8_aWWQUxOtZqJVQRaAIABWX", 
+    "expires_in": 7199
+}
+SM_WX_CONFIG：ff808081550594c0015505a201c70000
+
+获取access token:
+https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=wx791d897f45713b38&secret=ec1be18ba7c332f5ff260c08f3c93e2d
+获取jsapi_ticket:
+https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=ACCESS_TOKEN&type=jsapi
+
+微信公众号：
+UID:gh_b2cc3a55de7f
+PWD:tai_k_r_1031
+EMAIL:
+    taikongren1@163.com
+    tai_kong_ren
+    
+https://mp.weixin.qq.com/debug/cgi-bin/apiinfo?t=index&type=用户管理&form=获取关注者列表接口%20/user/get     
+
+appid:wx791d897f45713b38
+noncestr:QgxQDXcvfoSd9Xfl
+timestamp:1467592068
+url:http://10.68.19.114:8080/maintenance-weixin/bill/queryCreate?wxid=ff808081550594c0015505a201c70000
+signature:54de53c801694af7dca8629c49e59ef500591e80
+
+
+http://mp.weixin.qq.com/debug
+基础支持: 获取access_token接口 /token
+
+获取access token
+https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=wx791d897f45713b38&secret=ec1be18ba7c332f5ff260c08f3c93e2d
+
+获取jsapi_ticket
+https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=prJ41tKayPSY8TDCElv-Wpq7cw0HjltyYbjG8aRJFP-llTjeFI9APhEEcfqvkpUGZr1ChZkQBuuZXb1Wb6O23RRQ_vhJF433aOSFHoXgEz8LBDfAGABRT&type=jsapi
+
+
+微信菜单：
+http://mp.weixin.qq.com/debug
+{
+     "button":[
+        {
+           "name":"服务单",
+           "sub_button":[
+           { 
+               "type":"view",
+               "name":"申报服务单",
+               "url":"http://10.68.19.114:8080/maintenance-weixin/bill/queryCreate?wxid=ff808081550594c0015505a201c70000"
+            },
+            {
+               "type":"view",
+               "name":"查询服务单",
+               "url":"http://10.68.19.114:8080/maintenance-weixin/bill/queryList?wxid=ff808081550594c0015505a201c70000"
+            }]
+ },
+ {
+           "name":"投诉公告",
+           "sub_button":[
+           { 
+               "type":"view",
+               "name":"投诉建议",
+               "url":"http://10.68.19.114:8080/maintenance-weixin/advice/queryList.do?wxid=ff808081550594c0015505a201c70000"
+            },
+            {
+               "type":"view",
+               "name":"公告",
+               "url":"http://10.68.19.114:8080/maintenance-weixin/notice/queryList.do?wxid=ff808081550594c0015505a201c70000"
+            }]
+ },
+ {
+   "type":"view",
+   "name":"设置",
+   "url":"http://10.68.19.114:8080/maintenance-weixin/customerSetting/queryView?wxid=ff808081550594c0015505a201c70000"
+ }
+    ]
+ }
+
+wxLocalResource://
+
+    
+微信模板：
+模板ID：IQLEByWHTOip6hJm0ph1mbaSBdXxNnBcQTT8WL92AIU
+模板标题：服务单状态变化通知 
+模板内容：当前状态：{{status.DATA}} 单位：{{company.DATA}} 联系人:{{applyMan.DATA}} 联系时间:{{applyContact.DATA}} 项目名称：{{type.DATA}} 维护分类：{{project.DATA}} 申报时间：{{createTime.DATA}} 描述：{{remark.DATA}}
+   
+http://10.68.19.114:8080/maintenance-weixin/advice/queryList.do?wxid=ff808081550594c0015505a201c70000
+
+微信错误: errcode=45047, errmsg=out of response count limit hint
+
+http://www.cnblogs.com/txw1958/p/weixin-js-sdk-demo.html
+http://my.oschina.net/superkangning/blog/367484
+
+要接入图灵机器人API时：
+在图灵机器人官网注册账号，申请图灵key: 图灵key申请地址
+在 bot.py 文件所在目录下新建 conf.ini 文件，内容为:(key字段内容为申请到的图灵key)
