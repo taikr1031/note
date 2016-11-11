@@ -11,6 +11,7 @@ sudo cp -r /etc/apt/sources.list /etc/apt/sources.list.backup #备份源
 sudo gedit /etc/apt/sources.list #添加源
 sudo apt-get update #启用新的更新源   
 sudo apt-get update && sudo apt-get dist-upgrade #更新系统
+sudo du -sm dirname #查看文件夹大小
 sudo chmod -R 777 *** #修改文件/文件夹权限
 sudo chown zm:zm *** #修改文件/文件夹所属用户和用户组
 df -hl #查看各磁盘分区使用情况

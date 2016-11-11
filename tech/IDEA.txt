@@ -1,6 +1,9 @@
 VM Options:-Xms256m -Xmx1024m -XX:PermSize=250M -XX:MaxPermSize=512m
 -server -XX:PermSize=256M -XX:MaxPermSize=512m
 
+快捷键：setting->key map
+navigate->last edit location: ctrl+向左箭头
+
 显示文件过滤
 FILE -> SETTINGS -> FILE TYPES -> IGNORE FILES...
 下边是我过滤的类型,区分大小写的
