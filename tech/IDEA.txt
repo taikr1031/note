@@ -1,11 +1,11 @@
 VM Options:-Xms256m -Xmx1024m -XX:PermSize=250M -XX:MaxPermSize=512m
 -server -XX:PermSize=256M -XX:MaxPermSize=512m
 
-快捷键：setting->key map
-navigate->last edit location: ctrl+向左箭头
+快捷键：setting==>key map
+navigate==>last edit location: ctrl+向左箭头
 
 显示文件过滤
-FILE -> SETTINGS -> FILE TYPES -> IGNORE FILES...
+FILE ==> SETTINGS ==> FILE TYPES ==> IGNORE FILES...
 下边是我过滤的类型,区分大小写的
 CVS;SCCS;RCS;rcs;.DS_Store;.svn;.pyc;.pyo;*.pyc;*.pyo;.git;*.hprof;_svn;.sbas;.IJI.*;vssver.scc;vssver2.scc;.*;*.iml;*.ipr;*.iws;*.ids
 
@@ -21,7 +21,7 @@ A:	If you phone is configured for debuggin, disable and enable again.
 
 Q:svn: This client is too old to work with working copy
 A:file-settings-version_control-subversion
-	general->勾选use command line client，将默认值 svn 修改为C:\Program Files (x86)\Subversion\bin\svn.exe
+	general==>勾选use command line client，将默认值 svn 修改为C:\Program Files (x86)\Subversion\bin\svn.exe
 	同时将project里其他svn有问题的module都先删除，该module的svn就好了
 	
 本地SVN资源库：
