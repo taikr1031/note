@@ -1,3 +1,4 @@
+################################################## 系统初始化 ##################################################
 sudo gedit /etc/environment
 update-alternatives --config java //有时候不知道java安装在哪里了 通过whereis java命令不能知道java真是的安装路径 
 
@@ -7,7 +8,7 @@ db2 "CREATE DATABASE mydb USING CODESET ISO8859-1(UTF-8) TERRITORY CN"
 create db mydb using codeset utf-8 territory CN  
 
 (1)Ubuntu常用命令
-sudo cp -r /etc/apt/sources.list /etc/apt/sources.list.backup #备份源
+sudo cp -r /etc/apt/sources.list /etc/apt/sources.list.bak #备份源
 sudo gedit /etc/apt/sources.list #添加源
 sudo apt-get update #启用新的更新源   
 sudo apt-get update && sudo apt-get dist-upgrade #更新系统
@@ -26,11 +27,12 @@ sudo cp -a /home/zm/work/hadoop /home/zm/work/hadoop_bak #复制目录
 sudo rm -rf /dir1 #删除文件夹
 sudo shutdown -r now #Ubuntu重启
 shutdown -Fr #Aix重启
-sudo  ufw enable|disable #开启/关闭防火墙
+sudo ufw enable|disable #开启/关闭防火墙
 sudo ufw status #检查防火墙的状态
 sudo cat /etc/shadow #输入"cat /etc/shadow"回车，最后一行的第一个单词即“：”以前的部分应该就是用户名
 sudo passwd root #修改root密码
-sudo gedit /etc/hostname #修改主机名
+sudo gedit /etc/hostname #修改主机名-1
+sudo vim /etc/hosts #修改主机名-2
 sudo usermod old -l new #修改主用户名
 hostname #查看主机名
 hostname -i #查看IP
@@ -57,8 +59,13 @@ vmware虚拟机网卡断开：
 # reboot
 重启后会发现网卡正常启动
 
+
+NAT模式无法上网：管理-服务，开启VMware NAT Service和VMware DHCP Service2个服务
+
+
 sudo /etc/init.d/vboxdrv setup  #VirtualBox无法启动执行
 
+################################################## 常用命令 ##################################################
 sudo dpkg --info "软件包名" #列出软件包解包后的包名称.
 sudo dpkg -l #列出当前系统中所有的包.可以和参数less一起使用在分屏查看. (类似于rpm -qa)
 sudo dpkg -l |grep -i "软件包名" #查看系统中与"软件包名"相关联的包.
@@ -125,66 +132,6 @@ sudo apt-get update
 sudo apt-get install indicator-multiload
 
 
-/****************************************DB2安装配置 begin************************************************/
-taikongren@taikongren-pc:/opt/ibm/db2/V10.1_01/das/bin$ sudo /opt/ibm/db2/V10.1_01/das/bin/db2admin start
-SQL4409W  The DB2 Administration Server is already active.
-
-taikongren@taikongren-pc:/opt/ibm/db2/V10.1_01/das/bin$ su - dasusr1  
-密码：1
-dasusr1@taikongren-pc:~$ 
-
-db2inst1@taikongren-pc:~$ db2 get instance
-The current database manager instance is:  db2inst1
-
-db2inst1@taikongren-pc:~$ db2 create db mydb using codeset utf-8 territory CN  
-DB20000I  The CREATE DATABASE command completed successfully.
-db2inst1@taikongren-pc:~$ db2 list db directory
-/****************************************DB2安装配置 end************************************************/
-
-
-/****************************************UBUNTU安装配置************************************************/
---Ubuntu介绍
-http://wiki.ubuntu.org.cn/index.php?title=ubuntu%E6%A1%8C%E9%9D%A2%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97&variant=zh-cn
-
---安装JDK
-http://iliuyong.iteye.com/blog/228762
-
---安装Eclipse
-http://crabdave.iteye.com/blog/639874
---Ubuntu Eclipse 中文乱码
-http://hi.baidu.com/dingxirong/blog/item/f2e6b937fd5add2b5ab5f5c6.html
-
---安装Tomcat
-http://www.linuxidc.com/Linux/2010-07/27293.htm
-
---安转DB2
-http://dyccsxg.iteye.com/blog/997976
-http://www.blogjava.net/hardson/archive/2008/05/13/200115.html
-https://www14.software.ibm.com/webapp/iwm/web/reg/download.do?source=swg-db2expressc&S_TACT=109HF15W&lang=en_US&S_PKG=dllinux64&cp=UTF-8&dlmethod=http
-
---常用软件
-http://blog.csdn.net/uraplutonium/article/details/6181522
-
---Wine
-http://forum.ubuntu.org.cn/viewtopic.php?t=107816
-
---Thinkpad Trackpoint
-http://www.fovweb.com/fov/ubuntu-thinkpad.html
-
---thinkpad 驱动
-https://wiki.ubuntu.com/ThinkFinger
-
---各种压缩和解压命令
-http://www.diybl.com/course/6_system/linux/ubuntu/20110902/559481.html
-
---删除ubuntu冗余的开机启动菜单
-http://blog.chinaunix.net/uid-24807808-id-3070248.html
-
---WebQQ:
-http://linuxtoy.org/archives/webqq-desktop-integration.html
-Wine:
-http://www.linuxdiyf.com/viewarticle.php?id=181292
-
 #java环境变量设置
 sudo gedit /etc/profile
 export ANDROID_HOME=/home/taikongren/work/adt-bundle-linux-x86_64-20140321/sdk
@@ -194,6 +141,12 @@ export PATH=$JAVA_HOME/bin:$JAVA_HOME/jre/bin:$ANDROID_HOME/tools:$ANDROID_HOME/
 export M2_HOME=/home/taikongren/tool/apache-maven-3.2.5
 export PATH=$M2_HOME/bin:$PATH
 sudo source /etc/profile
+    
+################################################## 安装 ##################################################
+sudo apt-get install vim
+sudo apt-get install openssh-client #解决不能远程SSH连接-1
+sudo apt-get install openssh-server #解决不能远程SSH连接-2
+ps -e |grep ssh #查看是否存在ssh
     
 #安装notepadqq
 sudo add-apt-repository ppa:notepadqq-team/notepadqq
@@ -222,3 +175,79 @@ sudo gedit /etc/hosts/
 2.在『Android SDK Manager - Settings』窗口中，在「HTTP Proxy Server」和「HTTP Proxy Port」输入框内填入mirrors.neusoft.edu.cn和80，并且选　　　中「Force https://... sources to be fetched using http://...」复选框。设置完成后单击「Close」按钮关闭『Android SDK Manager - Settings』　　　窗口返回到主界面；
 3.依次选择「Packages」、「Reload」。
 
+
+
+sudo gedit /etc/network/interfaces
+
+
+#ubuntu16.04 修改NAT方式DHCP为静态IP:
+sudo vim /etc/network/interfaces # 若有内容，先全部删除。然后输入如下代码
+auto lo 
+iface lo inet loopback
+auto ens33 
+iface ens33 inet static 
+address: 192.168.244.12
+netmask: 255.255.255.0
+gateway: 192.168.244.2
+dns-nameservers 223.5.5.5
+
+sudo vim /etc/resolv.conf # 增加阿里的DNS
+nameserver 223.5.5.5
+
+sudo service network-manager restart #重启network manager
+
+#ubuntu时间不对，差8小时
+sudo apt-get install ntpdate
+sudo ntpdate time.windows.com
+sudo ntpdate ntp.server.name
+sudo hwclock --localtime --systohc
+
+#进入mysql
+mysql -u root -p
+  root
+#更改登录用户密码  
+update mysql.user set authentication_string=password('123') where user='root' and Host = 'localhost';
+
+#卸载mysql
+sudo apt-get autoremove --purge mysql-server mysql-client mysql-common
+sudo apt-get remove --purge mysql* 
+sudo apt-get autoremove mysql 
+sudo apt-get autoclean mysql
+
+
+sudo /etc/init.d/mysql stop 
+sudo mysqld_safe --skip-grant-tables &
+
+sudo vim /etc/mysql/debian.cnf
+  [client]
+  host     = localhost
+  user     = debian-sys-maint
+  password = 9xRbXa1ftp8PFkLJ
+  socket   = /var/run/mysqld/mysqld.sock
+  [mysql_upgrade]
+  host     = localhost
+  user     = debian-sys-maint
+  password = 9xRbXa1ftp8PFkLJ
+  socket   = /var/run/mysqld/mysqld.sock
+  
+
+
+
+UPDATE mysql.user SET Password=PASSWORD('root') where USER='root';
+
+################################################## 虚拟机配置 ##################################################
+hostname: ubuntu1
+user: user
+password: admin
+address: 192.168.244.11
+netmask: 255.255.255.0
+gateway: 192.168.244.2
+
+hostname: ubuntu2
+user: user
+password: admin
+address: 192.168.244.12
+netmask: 255.255.255.0
+gateway: 192.168.244.2
+
+scp -r /home/user/dev/jdk1.8.0 ubuntu2:/home/user/dev/
