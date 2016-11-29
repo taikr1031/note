@@ -1,3 +1,9 @@
+#vim 强制修改readonly文件
+:w !sudo tee %
+O #大写的O 
+:q!
+
+
 二 在Vim中打开/保存/退出/修改文件
 
 (1) :e filename < - > 打开文件filename，注意filename包含文件路径

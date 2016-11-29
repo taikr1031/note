@@ -202,17 +202,6 @@ sudo ntpdate time.windows.com
 sudo ntpdate ntp.server.name
 sudo hwclock --localtime --systohc
 
-#进入mysql
-mysql -u root -p
-  root
-#更改登录用户密码  
-update mysql.user set authentication_string=password('123') where user='root' and Host = 'localhost';
-
-#卸载mysql
-sudo apt-get autoremove --purge mysql-server mysql-client mysql-common
-sudo apt-get remove --purge mysql* 
-sudo apt-get autoremove mysql 
-sudo apt-get autoclean mysql
 
 
 sudo /etc/init.d/mysql stop 
@@ -251,3 +240,61 @@ netmask: 255.255.255.0
 gateway: 192.168.244.2
 
 scp -r /home/user/dev/jdk1.8.0 ubuntu2:/home/user/dev/
+
+###启动脚本
+/home/user/dev/apache-tomcat-8.5.8/bin/startup.sh               #tomcat启动
+/home/user/dev/apache-tomcat-8.5.8/bin/shutdown.sh              #tomcat停止
+tail -f /home/user/dev/apache-tomcat-8.5.8/logs/catalina.out    #查看tomcat日志
+/home/user/dev/zookeeper-3.4.9/bin/zkServer.sh start            #zookeeper启动
+
+sudo /etc/init.d/apache2 restart                                #apache重启
+
+#第一步：安装apache2  libapache2-svn subversion
+sudo apt-get install apache2                                    #安装apache。安装目录：/etc/apache2/ 
+sudo apt-get install subversion                                 #安装svn
+sudo apt-get install libapache2-svn
+#第二步：创建SVN库和项目
+sudo mkdir /home/user/dev/svn                                   #创建SVN库
+sudo svnadmin create /home/user/dev/svn/project                 #创建项目
+#第三步：创建组并添加成员
+sudo addgroup subversion    #创建一个叫subversion的组为拥有仓库所在的目录
+sudo  usermod -G subversion -a www-data #//将自己和“www-data”(Apache 用户)加入组成员中 
+more /etc/group | grep subversion
+#第四步：修改项目权限
+sudo chown -R root:subversion /home/user/dev/svn/project
+sudo chmod -R g+rws /home/user/dev/svn/project   //赋予组成员对所有新加入文件仓库的文件拥有相应的权限
+ls -l /home/user/dev/svn/project/db/txn-current-lock  #查看txn-current-lock文件的权限和用户以及组信息
+系统提示：-rw-rwSr-- 1 root subversion 0 2011-01-25 17:47  /home/svn/project/db/txn-current-lock
+#第五步：通过命令访问库
+sudo svn co file://localhost/home/user/dev/svn/project   //第一种方法，知道主机名时用
+sudo svn co file:///home/user/dev/svn/project    //第二种方法，当不确定主机命时用，这用的是file:///，三个斜杠
+系统提示：取出版本 0。
+己可以取出版本，说明SVN服务器己正常运行，下面试从webdav访问
+#第六步：配置apache2
+sudo vim /etc/apache2/mods-available/dav_svn.conf
+#加入以下代码：
+<Location /svn/>
+DAV svn
+SVNPath /home/user/dev/svn/project
+AuthType Basic
+AuthName "project subversion repository"
+AuthUserFile /etc/subversion/passwd
+<LimitExcept GET PROPFIND OPTIONS REPORT>
+Require valid-user
+</LimitExcept>
+</Location>
+#如果需要用户每次登录时都进行用户密码验证，就将<LimitExcept GET PROPFIND OPTIONS REPORT>与</LimitExcept>两行注释掉    
+sudo /etc/init.d/apache2 restart                                #apache重启
+#第七步：建立/etc/subversion/passwd文件，这个文件里包含了用户授权的详细信息
+sudo htpasswd -c /etc/subversion/passwd user           #第一次添加用户使用参数“-c”以后再添加就不用了
+svn co http://localhost/svn/project project --username user  #访问文件仓库
+OK！这次通过web页面访问到版本库了，下面试一下导入版本库
+导入版本库
+把/var/www/下的内容导入版本号中：
+sudo svn  import -m "第一次导入"  /var/www http://192.168.0.5/svn/project
+
+
+
+ps -ef | grep httpd         #查看当前启动和运行apache的用户
+sudo  usermod -G subversion -a user   //将自己和“www-data”(Apache 用户)加入组成员中    
+http://localhost/server-status  #查看apache运行时的信息。
