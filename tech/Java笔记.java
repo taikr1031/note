@@ -86,6 +86,14 @@ for(int i=0,len=list.size();i<len;i++)
 System.out.println(System.currentTimeMillis()); //1356622080064
 System.out.println(new Timestamp(new Date().getTime()).toString()); //2012-12-27 23:28:00.066
 
+Calendar cal = Calendar.getInstance();
+long END = org.rrd4j.core.Util.getTimestamp(cal);
+cal.add(Calendar.DATE, -1);
+long START = org.rrd4j.core.Util.getTimestamp(cal) + 3 * 60;
+SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+System.out.println("start=" + START + "   " + sdf.format(Util.getCalendar(START).getTime()));
+System.out.println("end=" + END + "   " + sdf.format(Util.getCalendar(END).getTime()));
+		
 //通过时间字符串获得时间
 String dateStr = "2012-01-01 11:11:11";
 DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

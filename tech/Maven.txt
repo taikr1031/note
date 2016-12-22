@@ -3,3 +3,12 @@ mvn eclipse:eclipse -DdownloadSources=true
 
 --打包
 mvn package -Dmaven.test.skip=true
+
+批量导入父子工程：
+1.新建工程目录夹，projdir
+2.将所有工程文件夹拷贝到projdir中，将***-parent工程中的pom.xml拷贝到projdir中与各工程目录平级，并在该文件中增加：
+<modules>
+    <module>project-name1</module>
+	<module>project-name2</module>
+</modules>
+在idea中导入已存在module，选择projdir文件夹，导入成功后，idea中的projdir下面会自动导入所有在<modules>中配置了的module

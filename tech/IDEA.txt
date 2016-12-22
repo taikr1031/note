@@ -1,6 +1,8 @@
 VM Options:-Xms256m -Xmx1024m -XX:PermSize=250M -XX:MaxPermSize=512m
 -server -XX:PermSize=256M -XX:MaxPermSize=512m
 
+创建Maven项目速度慢问题: 在创建Maven项目时加上 archetypeCatalog=internal 参数
+
 快捷键：setting==>key map
 navigate==>last edit location: ctrl+向左箭头
 

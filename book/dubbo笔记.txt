@@ -1,0 +1,55 @@
+看dubbo主要是想学习一下对应的ClassLoader的隔离机制
+
+Dubbo缺省协议，使用基于mina1.1.7+hessian3.2.1的tbremoting交互：
+	连接个数：单连接
+	连接方式：长连接
+	传输协议：TCP
+	传输方式：NIO异步传输
+	序列化：Hessian二进制序列化
+	适用范围：传入传出参数数据包较小(建议小于100K)，消费者比提供者个数多，单一消费者无法压满提供者，尽量不要用dubbo协议传输大文件或超大字符串
+	适用场景：常规远程服务方法调用
+
+一个系统拆分成一个一个足够小足够好的模块后，各模块就变成的单独的服务， a 如果依赖 b ，那么 a 直接调用 b 的服务接口。一个系统里模块多的话，你调用我我调用你，调用关系就会变得很复杂，变成一个网。这时候就需要引入服务治理，需要一个注册中心给各个服务自己注册， java 方面阿里巴巴在这块专门有一个 dubbo 框架，基于 netty 的一个异步非阻塞的 nio 网络框架。 python 方面我还不了解。 
+
+Dubbo的设计目的是为了满足高并发小数据量的rpc调用，在大数据量下的性能表现并不好，建议使用rmi或http协议。
+
+dubbo分为10层:
+	config:配置层
+	proxy：服务代理层
+	registry：注册中心
+	cluster：路由曾。封装多个提供者及负载均衡。桥接注册中心
+	monitor：监控层
+	protocol：远程调用层
+	exchange：信息交换层
+	transport：网络传输层
+	serialize：数据化序列曾
+	dubbo也实现软负载均衡。
+
+dubbo支持多种远程调用方式，例如dubbo RPC（二进制序列化 + tcp协议）、http invoker（二进制序列化 + http协议，至少在开源版本没发现对文本序列化的支持）、hessian（二进制序列化 + http协议）、WebServices （文本序列化 + http协议）等等，但缺乏对当今特别流行的REST风格远程调用（文本序列化 + http协议）的支持.学习资料：http://edu.51cto.com/course/course_id-426.html
+
+
+工程划分：实现工程间解耦，将前后多层都需要使用的类放到服务接口层
+  edu-common-parent   maven父工程
+  edu-common          公共工程        共用工具类、枚举、异常
+  edu-common-config   公共配置工程    配置信息，zookeeper配置，mq配置等
+  edu-common-core     公共core工程    bizDao，访问数据库
+  edu-common-web      公共web工程     公共web类
+  edu-facade-user     用户服务接口
+  edu-service-user    用户服务实现
+  edu-web-boss        服务消费者      MVC的C
+  
+管理控制台包含：
+  路由规则
+  动态配置
+  服务降级
+  访问控制
+  权重调整
+  负载均衡
+
+maven中构建需要按照工程POM文件依赖顺序进行，如common，core等包需要先于使用这些工程的包
+
+hudson: 项目开发持续集成管理平台
+  
+  
+su - user -c '/home/user/dev/zookeeper-3.4.9/bin/zkServer.sh start'
+su - user -c '/home/wusc/dubbo-admin-tomcat/bin/startup.sh'

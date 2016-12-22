@@ -1,0 +1,13 @@
+分布式系统三要素：内存、CPU、IO
+	CPU: 多核CPU。以前CPU都是SMP对称多处理器结构。
+	MEMORY: 1.RDMA：（Remote Direct Memory Access）技术全称远程直接数据存取，解决网络传输中服务器端数据处理的延迟而产生的。
+						RDMA是和TCP同一层的协议。剔除了TCP中复杂的东西，网卡之间直接互通，不经过CPU中断和TCP协议传输，实现0拷贝
+						把用户的内存不经过OS传输到另一端
+							TCP协议：高延迟，报文小，确认机制复杂，不能充分发挥硬件的性能。
+							RDMA协议：低延迟、大报文，传输速度快
+					2.NUMA：（Non Uniform Memory Access Architecture）
+						技术可以使众多服务器像单一系统那样运转，同时保留小系统便于编程和管理的优点。threadLocal是采用NUMA
+	IO：万兆网，传输速度比SSD传输还快
+	
+硬盘中集成了CPU、内存、网卡等，自身就是一个服务器
+移动互联网的竞争就是用户的竞争，用户意味着流程和商机
