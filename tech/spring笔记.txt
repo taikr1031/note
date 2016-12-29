@@ -1,0 +1,14 @@
+类要在spring的项目启动时同时启动，2个办法：
+1.将该类实现 ServletContextListener
+@Service
+public class QueueReceiver implements ServletContextListener{
+	public void contextInitialized(ServletContextEvent sce) {
+		ApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(sce.getServletContext());
+		QueueReceiver qr = (QueueReceiver)ctx.getBean("queueReceiver");
+		qr.acceptMsg();
+	}
+}
+<listener>
+	<listener-class>com.sishuok.architecture1.ordermgr.queue.QueueReceiver</listener-class>
+</listener>
+2.作为一个Servlet的init()方法

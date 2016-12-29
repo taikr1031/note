@@ -4,6 +4,11 @@ mvn eclipse:eclipse -DdownloadSources=true
 --打包
 mvn package -Dmaven.test.skip=true
 
+--memcached 在maven项目中使用
+将下载的 java_memcached-release_2.6.6.jar 这个文件放在d盘（你看哪边爽 放在哪边）
+mvn install:install-file -Dfile=d:/java_memcached-release_2.6.6.jar -DgroupId=com.danga -DartifactId=memcached -Dversion=2.5.3 -Dpackaging=jar -DgeneratePom=true  
+
+
 批量导入父子工程：
 1.新建工程目录夹，projdir
 2.将所有工程文件夹拷贝到projdir中，将***-parent工程中的pom.xml拷贝到projdir中与各工程目录平级，并在该文件中增加：

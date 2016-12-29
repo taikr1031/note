@@ -1,3 +1,6 @@
+rpm -ql *** #查找安装路径
+sudo yum erase libreoffice\* #卸载 libreoffice
+
 ###Tracker	Storage
 yum -y install wget zip unzip
 yum install zip unzip  
@@ -9,6 +12,44 @@ cd /usr/local/src
 unzip libfastcommon-master.zip
 cd libfastcommon-master
 ./make.sh && ./make.sh install
+
+#安装Nginx
+tar -zxvf nginx-1.10.2.tar.gz
+cd /home/user/dev/nginx-1.10.2
+./configure --prefix=/home/user/dev/nginx --with-http_stub_status_module --with-http_ssl_module
+make && make install
+cd /home/user/dev/nginx/sbin
+rm -rf /home/user/dev/nginx-1.10.2
+/home/user/dev/nginx/sbin/nginx -v    					#查看nginx版本
+sudo /home/user/dev/nginx/sbin/nginx -t    			#检查配置文件ngnix.conf的正确性
+vim /home/user/dev/nginx/conf/nginx.conf				#权限问题导致Nginx 403 Forbidden错误
+	#将第一行的 #user nobody 改成 user user(后面的 user 是当前登录用户名)
+sudo vim /etc/rc.d/rc.local   									#设置 Nginx 开机自动启动，添加以下内容：
+	su - root -c '/home/user/dev/nginx/sbin/nginx'
+	#su - user -c '/home/user/dev/zookeeper/bin/zkServer.sh start'
+	#su - user -c '/home/user/dev/tomcat/bin/startup.sh'
+sudo reboot																			#机器重启
+sudo /home/user/dev/nginx/sbin/nginx       			#启动nginx	http://192.168.244.14:8888/
+sudo /home/user/dev/nginx/sbin/nginx -s reload  #重启nginx
+sudo /home/user/dev/nginx/sbin/nginx -s stop    #关闭nginx
+ps -ef | grep nginx
+
+#安装Varnish
+sudo yum install libedit-dev*
+export PKG_CONFIG_PATH=/usr/local/pcre/lib/pkgconfig
+tar -zxvf /home/user/dev/varnish-4.1.4.tar.gz
+cd /home/user/dev/varnish-4.1.4
+sudo yum install python-docutils
+./configure --prefix=/home/user/dev/varnish
+make && make install
+cd /home/user/dev/varnish
+mkdir -p /home/user/dev/varnish/etc/varnish
+将 default.vcl 编辑后放到 /home/user/dev/varnish/etc/varnish 目录下
+/home/user/dev/varnish/sbin/varnishd -f /home/user/dev/varnish/etc/varnish/default.vcl -s malloc,32M -T 127.0.0.1:2000 -a 0.0.0.0:1111	#启动
+cd /home/user/dev/varnish/sbin
+pkill varnished	#停止
+/home/user/dev/varnish/bin/varnishlog	#健康检查
+
 
 ln -s /usr/lib/libfastcommon.so /usr/local/lib/libfastcommon.so
 ln -s /usr/lib/libfastcommon.so /usr/lib/libfastcommon.so
@@ -109,12 +150,6 @@ ps -ef | grep fdfs                        #查看 FastDFS Tracker 是否已成�
 /etc/init.d/fdfs_storaged start/stop   		#启动/停止 Storage
 cd /fastdfs/storage/data/00/00    				#查看上传文件
 
-/usr/local/nginx/sbin/nginx       				#启动nginx	http://192.168.244.14:8888/
-/usr/local/nginx/sbin/nginx -s stop       #启动nginx
-/usr/local/nginx/sbin/nginx -s reload     #启动nginx
-/usr/local/nginx/sbin/nginx -v    				#查看nginx版本
-/usr/local/nginx/sbin/nginx -t    				#检查配置文件ngnix.conf的正确性
-ps -ef | grep nginx
 http://192.168.244.12:8888/group1/M00/00/00/wKj0DVhALF-AJUz5AAAdwblCcDQ394.log
 http://192.168.244.13:8888/group1/M00/00/00/wKj0DVhAjr6AOsAgAAANOE6_0rQ.syslog
 

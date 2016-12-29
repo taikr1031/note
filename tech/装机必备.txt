@@ -17,6 +17,8 @@ windows：
 	快转视频格式转换器
 	powerCmd
 	robomongo
+	Weeny Free PDF Password Remover
+	unlocker
 	
 ubuntu：
     krusader

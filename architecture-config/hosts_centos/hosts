@@ -1,0 +1,6 @@
+127.0.0.1	www.taikr.com search.taikr.com product.taikr.com localhost.localdomain localhost
+::1		localhost6.localdomain6 localhost6
+
+192.168.244.11 cent-d-11
+192.168.244.14 cent-s-14
+192.168.244.15 cent-s-15
