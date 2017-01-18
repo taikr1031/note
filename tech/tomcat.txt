@@ -1,4 +1,9 @@
 #tomcat参数优化：
-$ vi /home/wusc/edu/web/boss-tomcat/bin/catalina.sh
-#!/bin/sh
-JAVA_OPTS='-Xms128m -Xmx512m -XX:PermSize=128m'
+vim $TOMCAT_HOME/bin/catalina.sh
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/user/dev/apr/lib export LD_LIBRARY_PATH
+Tomcat7:JAVA_OPTS="-server -Xms512M -Xmx512M -XX:PermSize=64M -XX:MaxPermSize=128M -xx:MaxNewSize=384M"
+Tomcat8:JAVA_OPTS="-server -Xms512M -Xmx512M -XX:MetaspaceSize=64M -XX:MaxMetaspaceSize=128M -xx:MaxNewSize=384M"
+
+XX:MetaspaceSize
+ps -ef|grep tomcat
+jmap -heap 5166	#察看tomat配置消息。5166是上面ps命令查出来的tomcat进程号

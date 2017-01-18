@@ -78,3 +78,13 @@ NoSQL：判断依据：是否有强事务需要
 	
 高并发处理的基本手段-1：
 1.客户端发起请求层面：合理设置过期时间
+
+#、Web缓存和静态化
+手工实现静态化：
+1.新建一个Thread，该线程每隔一段时间从数据库查出哪些需要静态化，并生成所有首页的静态化HTML
+2.新建一个Listener，他来实现当应用启动时，自动启动该线程
+3.新建一个Filter，当从Varnish来的外部访问应用时，如果请求时系统配置的静态化请求，则读取静态化HTML，如有，则返回HTML，如没有，则通知线程生成该请求的静态化，并返回生成后的HTML
+
+Tomcat优化：
+vim $TOMCAT_HOME/bin/catalina.sh
+JAVA_OPTS="-server -Xms512M -Xmx512M -XX:PermSize=64M -XX:MaxPermSize=128M -xx:MaxNewSize=384M"

@@ -1,0 +1,17 @@
+一.从Git下载并导入IDEA
+git clone https://github.com/spring-projects/spring-framework/tags/v3.2.0.RELEASE spring3.2
+如果无法clone，则通过SVN工具直接Checkout到spring3.2目录
+cd spring3.2
+./gradlew cleanIdea :spring-oxm:compileTestJava
+
+cd D:\idea15\workspace\spring\
+反复执行 import-into-eclipse.bat，直到全部 100% build success
+
+idea 以Eclipse 方式导入IDEA
+导入后发现缺少2个jar包，通过一下命令生成：
+	cd D:\idea15\workspace\spring\spring-core\src\main\java
+	jar cvf spring-cglib-repack-3.2.4.jar org\springframework\cglib
+	jar cvf spring-objenesis-repack02.4.jar g\springframework\objenesis
+
+	
+ResourceTests.java

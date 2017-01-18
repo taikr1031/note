@@ -1,0 +1,2 @@
+开发一个商品、购物车、仓库的系统。利用学到的知识实现分布式架构并优化。
+Nginx、Varnish、Tomcat、MemCache、Redis、ActiveMQ、MongoDB、MySql、FastDFS、Zookeeper、Dubbo

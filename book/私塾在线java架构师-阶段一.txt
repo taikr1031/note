@@ -1,12 +1,3 @@
-1.Nginx：		可集群。再Nginx前面架设F5做负载均衡分发到Nginx，一个Nginx又可以分发到多个Varnish
-2.Varnish：	可集群。将Varnish和后面所有的部分看成一个块，可复制多份，通过前面的Nginx分发，对应多个块
-3.MogileFS：可分布式。一个Nginx可以对应多个Track，而一个Track又对应多个DataNode
-4.Tomcat：
-5.ActiveMQ：可集群。如后台处理太慢，撑不住，可异步处理，将不需要实时响应的放到ActiveMQ中
-6.MemCache：可集群。部分数据的缓存，提高程序运行速度，提高并发性。
-7.MongoDB：	可集群。无事务要求、写少读多。支持数据的复制、分片、水平扩展
-8.MySql：		主从分离，读写分离；将数据量大，写少读多的部分数据放入MongoDB 
-
 分布式系统规划：
 1、Redis加速：用Redis缓存来给WordPress站点加速-适用于Apache和Nginx
 2、负载均衡：免费空间+便宜VPS和OpenResty,Ngx_lua,Redis搭建系统负载均衡环境

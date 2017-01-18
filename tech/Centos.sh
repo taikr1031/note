@@ -1,5 +1,10 @@
-rpm -ql *** #查找安装路径
-sudo yum erase libreoffice\* #卸载 libreoffice
+rpm -ql *** 									#查找安装路径
+sudo yum erase libreoffice\* 	#卸载 libreoffice
+history | grep -i "varnish"		#查看历史执行命令
+tracert www.baidu.com					
+chkconfig --list 							#显示开机可以自动启动的服务
+chkconfig --add iptables			#开机自动启动iptables服务；
+chkconfig --del iptables			#开机禁止启动iptables服务；
 
 ###Tracker	Storage
 yum -y install wget zip unzip
@@ -12,6 +17,41 @@ cd /usr/local/src
 unzip libfastcommon-master.zip
 cd libfastcommon-master
 ./make.sh && ./make.sh install
+
+############################################ 软件安装 ############################################
+#安装Apache
+sudo yum install httpd httpd-devel
+sudo vim /etc/selinux/config	#将SELINUX=enforcing 改为：SELINUX=disable  禁用SeLinux
+sudo vim /etc/httpd/conf/httpd.conf
+	ServerName 192.168.244.11:8055
+	Listen 8055
+sudo service httpd start
+sudo chkconfig httpd on
+sudo vim /etc/httpd/conf.d/subversion.conf #增加以下内容
+	#Include /svn/httpd.conf
+	<Location /svn/>
+		DAV svn
+		SVNListParentPath on
+		SVNParentPath /home/user/dev/svn
+		AuthType Basic
+		AuthName "Subversion repositories"
+		AuthUserFile /home/user/dev/svn/passwd.http
+		AuthzSVNAccessFile /home/user/dev/svn/authz
+		Require valid-user
+	</Location>
+	RedirectMatch ^(/svn)$ $1/
+	
+	touch /home/user/dev/svn/passwd.http
+	touch /home/user/dev/svn/authz
+
+#安装SVN
+svnserve -d -r /home/user/dev/svn --listen-port 3391
+ps -aux |grep svn  
+kill -9 
+svn://192.168.244.11/repo1
+svn import big svn://192.168.244.11:3096/repo1/big -m "first import project"  
+svn import big svn://192.168.244.11/repo1/big -m "first import project" 
+
 
 #安装Nginx
 tar -zxvf nginx-1.10.2.tar.gz
@@ -50,11 +90,78 @@ cd /home/user/dev/varnish/sbin
 pkill varnished	#停止
 /home/user/dev/varnish/bin/varnishlog	#健康检查
 
+#启动Tomcat
+/home/user/dev/tomcat8.5.8/bin/startup.sh
+/home/user/dev/tomcat8.5.8/bin/shutdown.sh
+/home/user/dev/tomcat/bin/version.sh 	#查看版本信息
+#安装OpenSsl 1.1.0
+wget https://www.openssl.org/source/openssl-1.1.0-latest.tar.gz
+tar -zxvf openssl-1.1.0-latest.tar.gz
+cd openssl-1.1.0c
+./config --prefix=/home/user/dev/openssl -fPIC
+make && make install
+sudo /home/user/dev/openssl/bin/openssl /usr/bin/
+sudo mv /usr/bin/openssl ~
+sudo ln -s /home/user/dev/openssl/bin/openssl /usr/bin/openssl
+openssl version
+sudo rm -rf /usr/lib64/libssl.so.1.1
+sudo rm -rf /usr/lib64/libcrypto.so.1.1
+sudo ln -s /home/user/dev/openssl/lib/libssl.so.1.1 /usr/lib64/libssl.so.1.1
+sudo ln -s /home/user/dev/openssl/lib/libcrypto.so.1.1 /usr/lib64/libcrypto.so.1.1
+/home/user/dev/openssl/bin/openssl version
+
+wget http://mirrors.hust.edu.cn/apache/tomcat/tomcat-connectors/native/1.1.34/source/tomcat-native-1.1.34-src.tar.gz
+上面的gz包下载下来之后，放到Tomcat的bin目录下去，解压，进入目录
+cd /home/user/dev/tomcat/bin/tomcat-native-1.1.34-src/jni/native
+
+#安装apr
+./configure --prefix=/home/user/dev/apr
+make && make install
+./configure --prefix=/home/user/dev/apr-iconv --with-apr=/home/user/dev/apr
+make && make install
+./configure --prefix=/home/user/dev/apr-util --with-apr=/home/user/dev/apr --with-apr-iconv=/home/user/dev/apr-iconv/bin/apriconv
+make && make install
+cd /home/user/dev/tomcat/bin
+wget http://mirrors.hust.edu.cn/apache/tomcat/tomcat-connectors/native/1.2.10/source/tomcat-native-1.2.10-src.tar.gz
+tar -zxvf tomcat-native-1.1.34-src.tar.gz
+cd /home/user/dev/tomcat/bin/tomcat-native-1.2.10-src/jni/native
+./configure --with-apr=/home/user/dev/apr --with-ssl-dir=/home/user/dev/openssl --with-java-home=$JAVA_HOME --with-openssl-includes=/usr/include
+make && make install
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/user/dev/apr/lib export LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/user/dev/apr/lib
+
+#安装MemCached
+cd /home/user/dev/libevent-2.0.22-stable
+./configure --prefix=/home/user/dev/libevent 
+make && make install
+cd /home/user/dev/memcached-1.4.33
+./configure --prefix=/home/user/dev/memcached --with-libevent=/home/user/dev/libevent/
+make && make install
+#启动MemCached
+/home/user/dev/memcached/bin/memcached -d -m 10 -u user -l 192.168.244.11 -p 2222 -c 256 -P /tmp/memcached.pid
+#关闭Memcached
+ps aux|grep memcached
+kill -9 ***
+############################################ 软件安装 ############################################
+
+#测试(Nginx、Varnish、Tomcat)
+http://192.168.244.11				#Nginx
+http://192.168.244.11:1111	#Varnish
+http://192.168.244.11:8080	#Tomcat
+http://www.taikr.com				#Windows的hosts：192.168.244.11 cent-d-11 www.taikr.com
+http://www.taikr.com:1111		#Windows的hosts：192.168.244.11 cent-d-11 www.taikr.com
+http://www.taikr.com:8080		#Windows的hosts：192.168.244.11 cent-d-11 www.taikr.com
 
 ln -s /usr/lib/libfastcommon.so /usr/local/lib/libfastcommon.so
 ln -s /usr/lib/libfastcommon.so /usr/lib/libfastcommon.so
 ln -s /usr/lib/libfdfsclient.so /usr/local/lib/libfdfsclient.so
 ln -s /usr/lib/libfdfsclient.so /usr/lib/libfdfsclient.so
+
+################################ ActiveMQ ################################
+/home/user/dev/activemq/bin/activemq start
+/home/user/dev/activemq/bin/activemq stop
+http://192.168.244.11:8161/admin	username:admin	password:admin
+
 
 ################################ Zookeeper ################################
 $ sudo vim /etc/hosts
@@ -164,107 +271,100 @@ cd /home/user/dev
 unzip libfastcommon-master.zip
 cd libfastcommon-master
 #编译、安装。libfastcommon 默认安装到了，/usr/lib/libfastcommon.so，/usr/lib64/libfdfsclient.so
-./make.sh && ./make.sh install
+sudo ./make.sh && sudo ./make.sh install
 #因为 FastDFS 主程序设置的 lib 目录是/usr/local/lib，所以需要创建软链接
-ln -s /usr/lib64/libfastcommon.so /usr/local/lib/libfastcommon.so
-ln -s /usr/lib64/libfastcommon.so /usr/lib/libfastcommon.so
-ln -s /usr/lib64/libfdfsclient.so /usr/local/lib/libfdfsclient.so
-ln -s /usr/lib64/libfdfsclient.so /usr/lib/libfdfsclient.so
+sudo ln -s /usr/lib64/libfastcommon.so /usr/local/lib/libfastcommon.so
+sudo ln -s /usr/lib64/libfastcommon.so /usr/lib/libfastcommon.so
+sudo ln -s /usr/lib64/libfdfsclient.so /usr/local/lib/libfdfsclient.so
+sudo ln -s /usr/lib64/libfdfsclient.so /usr/lib/libfdfsclient.so
 #3.安装 FastDFS
 cd /home/user/dev
 tar -zxvf FastDFS_v5.05.tar.gz
 cd FastDFS
-./make.sh && ./make.sh install
+sudo ./make.sh && sudo ./make.sh install
 cd /usr/bin/
 ls | grep fdfs
 #将两个脚本中的/usr/local/bin 修改成/usr/bin
-vim /etc/init.d/fdfs_storaged   # :%s+/usr/local/bin+/usr/bin
-vim /etc/init.d/fdfs_storaged   # :%s+/usr/local/bin+/usr/bin
+sudo vim /etc/init.d/fdfs_trackerd   # :%s+/usr/local/bin+/usr/bin
+sudo vim /etc/init.d/fdfs_storaged   # :%s+/usr/local/bin+/usr/bin
 
 ###配置FastDFS跟踪器(192.168.4.121)
 cd /etc/fdfs/
-cp tracker.conf.sample tracker.conf
-vim /etc/fdfs/tracker.conf
+sudo cp tracker.conf.sample tracker.conf
+sudo vim /etc/fdfs/tracker.conf
   disabled=false
   port=22122
   base_path=/fastdfs/tracker
-mkdir -p /fastdfs/tracker
-vi /etc/sysconfig/iptables  #添加如下端口行
+sudo mkdir -p /fastdfs/tracker
+sudo vim /etc/sysconfig/iptables  											#添加如下端口行
   -A INPUT -m state --state NEW -m tcp -p tcp --dport 22122 -j ACCEPT
-service iptables restart    #重启防火墙
-/etc/init.d/fdfs_trackerd start/stop      #启动/停止 Tracker
-ps -ef | grep fdfs                        #查看 FastDFS Tracker 是否已成功启动
+sudo service iptables restart    												#重启防火墙
+sudo /etc/init.d/fdfs_trackerd start/stop      					#启动/停止 Tracker
+ps -ef | grep fdfs                        							#查看 FastDFS Tracker 是否已成功启动
 /usr/bin/fdfs_upload_file /etc/fdfs/client.conf /root/install.log   #上传本地文件
-/usr/bin/fdfs_monitor /etc/fdfs/client.conf  #监控
-vi /etc/rc.d/rc.local   #设置 FastDFS 跟踪器开机启动，添加以下内容：
-/etc/init.d/fdfs_trackerd start
+/usr/bin/fdfs_monitor /etc/fdfs/client.conf  						#监控
+sudo vim /etc/rc.d/rc.local   													#设置 FastDFS 跟踪器开机启动，添加以下内容：
+  su - root -c 'sudo /etc/init.d/fdfs_trackerd start'
 
 ###配置 FastDFS 存储
 cd /etc/fdfs/
-cp storage.conf.sample storage.conf
-vim /etc/fdfs/storage.conf
-mkdir -p /fastdfs/storage
-vim /etc/sysconfig/iptables   #添加如下端口行
+sudo cp storage.conf.sample storage.conf
+sudo vim /etc/fdfs/storage.conf
+	base_path=/fastdfs/storage
+	store_path0=/fastdfs/storage
+	tracker_server=192.168.4.121:22122
+	http.server_port=80  #8888
+sudo mkdir -p /fastdfs/storage
+sudo vim /etc/sysconfig/iptables   											#添加如下端口行
 -A INPUT -m state --state NEW -m tcp -p tcp --dport 23000 -j ACCEPT
-service iptables restart        #重启防火墙
-/etc/init.d/fdfs_storaged start #启动 Storagevi 
-vim /etc/rc.d/rc.local   #设置 FastDFS 跟踪器开机启动，添加以下内容：
-  /etc/init.d/fdfs_storaged start
+sudo service iptables restart        										#重启防火墙
+sudo /etc/init.d/fdfs_storaged start 										#启动 Storagevi 
+sudo vim /etc/rc.d/rc.local   													#设置 FastDFS 跟踪器开机启动，添加以下内容：
+	su - root -c 'sudo /etc/init.d/fdfs_storaged start'
 ###文件上传测试。修改 Tracker 服务器中的客户端配置文件：
-cp /etc/fdfs/client.conf.sample /etc/fdfs/client.conf
-vim /etc/fdfs/client.conf
+sudo cp /etc/fdfs/client.conf.sample /etc/fdfs/client.conf
+sudo vim /etc/fdfs/client.conf
   base_path=/fastdfs/tracker
   tracker_server=192.168.4.121:22122
-/usr/bin/fdfs_upload_file /etc/fdfs/client.conf /root/install.log   #上传本地文件
-/usr/bin/fdfs_monitor /etc/fdfs/client.conf  #监控
+sudo /usr/bin/fdfs_upload_file /etc/fdfs/client.conf /home/user/zookeeper.out   #上传本地文件
+sudo /usr/bin/fdfs_monitor /etc/fdfs/client.conf  #监控
 
+###配置Nginx
+tar -zxvf fastdfs-nginx-module_v1.16.tar.gz
+cd fastdfs-nginx-module/src
+sudo vim config
+	#CORE_INCS="$CORE_INCS /usr/local/include/fastdfs /usr/local/include/fastcommon/"		#注释
+	CORE_INCS="$CORE_INCS /usr/include/fastdfs /usr/include/fastcommon/"								#增加
+#安装Nginx
+sudo yum install gcc gcc-c++ make automake autoconf libtool pcre* zlib openssl openssl-devel
+tar -zxvf nginx-1.6.2.tar.gz
+cd /home/user/dev/nginx-1.6.2
+/home/user/dev/nginx-1.6.2/configure --prefix=/home/user/dev/nginx --add-module=/home/user/dev/fastdfs-nginx-module/src
+./make.sh && ./make.sh install
+cd /home/user/dev/nginx
+#安装fastdfs-nginx-module
+sudo cp /home/user/dev/fastdfs-nginx-module/src/mod_fastdfs.conf /etc/fdfs/
+sudo vim /etc/fdfs/mod_fastdfs.conf
+	connect_timeout=10
+	base_path=/tmp
+	tracker_server=192.168.244.11:22122
+	storage_server_port=23000
+	group_name=group1
+	url_have_group_name = true
+	store_path0=/fastdfs/storage
+cd /home/user/dev/FastDFS/conf
+sudo cp /home/user/dev/FastDFS/conf/http.conf mime.types /etc/fdfs/
+sudo ln -s /fastdfs/storage/data/ /fastdfs/storage/data/M00
+sudo vim /home/user/dev/nginx/conf/nginx.conf
+	***
+sudo /home/user/dev/nginx/sbin/nginx	#启动Nginx
+#测试Nginx和FastDFS
+sudo /usr/bin/fdfs_upload_file /etc/fdfs/client.conf /etc/hosts	#/etc/hosts 是任意待上传文件名
+group1/M00/00/00/wKj0C1h2MiuACzDnAAA2WcXTFg8755
+http://192.168.244.11/group1/M00/00/00/wKj0C1h2MiuACzDnAAA2WcXTFg8755
+http://192.168.244.11/group1/M00/00/00/wKj0C1h3L_yAdFP1AA1rIuRd3Es209.jpg
+################################################## fastdfs + nginx ##################################################
 
-################################################## 需要检查的文件 ##################################################
-###All
-vim /etc/init.d/fdfs_storaged   #/usr/local/bin 修改成/usr/bin
-vim /etc/init.d/fdfs_trackerd   #/usr/local/bin 修改成/usr/bin 
-###Tracker
-vim /etc/fdfs/tracker.conf  #port=22122   base_path=/fastdfs/tracker
-  store_group=group1   http.server_port=8080  
-vim /etc/fdfs/client.conf #base_path=/fastdfs/tracker   tracker_server=192.168.244.12:22122   http.tracker_server_port=80
-vim /etc/fdfs/storage.conf  #disabled=false   group_name=group1 port=23000 base_path=/fastdfs/storage  store_path0=/fastdfs/storage  tracker_server=192.168.244.12:22122   http.server_port=8888
-
-
-修改8888:/etc/fdfs/storage.conf   /etc/fdfs/storage.conf
-修改groupName:/etc/fdfs/storage.conf
-
-
-################################################## 虚拟机配置 ##################################################
-hostname: cent-d-11
-user: user
-password: admin
-root password: 111111
-address: 192.168.244.11
-netmask: 255.255.255.0
-gateway: 192.168.244.2
-bcast:   192.168.244.255 
-	tomcat-8.5.8[8080]	
-	zookeeper-3.4.9[2181]	
-
-hostname: cent-s-14
-user: root
-password: 111111
-address: 192.168.244.14
-netmask: 255.255.255.0
-gateway: 192.168.244.2
-bcast:   192.168.244.255 
-	nginx-1.10.2[8888]
-	fastdfs
-
-hostname: cent-s-15
-user: root
-password: 111111
-address: 192.168.244.15
-netmask: 255.255.255.0
-gateway: 192.168.244.2
-bcast:   192.168.244.255 
-	fastdfs
-	
 ###SecureCRT终端美化
 scheme: Traditional
 font: Courier 10 Pitch
@@ -338,3 +438,11 @@ vim file
 Enter encryption key: 输入密码
 :set key= 
 :x
+
+3.could not bind to address no listening sockets available shutting down
+	发现是SELinux在作怪，查看SElinux使用状态
+	#getenforce
+	Enforcing 	#SElinux未禁用。
+	1.临时禁用：sudo setenforce 0
+	2.永久禁用：sudo vim /etc/selinux/config	#将SELINUX=enforcing 改为：SELINUX=disable  禁用SeLinux
+

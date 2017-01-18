@@ -1,7 +1,18 @@
 VM Options:-Xms256m -Xmx1024m -XX:PermSize=250M -XX:MaxPermSize=512m
 -server -XX:PermSize=256M -XX:MaxPermSize=512m
 
+快捷键：
+Shift + F6  					重构-重命名
+Ctrl +	F6						方法重构
+Alt	+	F8      				debug时选中查看值
+
+Ctrl+Shift + F12			窗口最大化
+
+
+
 创建Maven项目速度慢问题: 在创建Maven项目时加上 archetypeCatalog=internal 参数
+
+启动Jetty：mvn -Djetty.http.port=9999 jetty:run
 
 快捷键：setting==>key map
 navigate==>last edit location: ctrl+向左箭头
@@ -26,9 +37,12 @@ A:file-settings-version_control-subversion
 	general==>勾选use command line client，将默认值 svn 修改为C:\Program Files (x86)\Subversion\bin\svn.exe
 	同时将project里其他svn有问题的module都先删除，该module的svn就好了
 	
-本地SVN资源库：
-file:///D:\dev\svn\chat-weixin
-file:///D:\dev\svn\chat-app
-
-http://blog.csdn.net/ma929226676/article/details/50970524
-http://blog.csdn.net/u010739551/article/details/51423538
+Q:Jrebel破解： 
+A:1.关闭Intellij IDEA 
+	2.破解文件所在文件夹名称 jrebel-6.4.0-Enterprise.Cracked-ZCT，替换jar包与licence文件 ​
+	C:\Users\taikongren\.jrebel\jrebel.lic替换为下载的jrebel.lic； 
+	3. 将补丁解压包里的文件分别覆盖一下文件,注意文件夹的名字哦。 
+	C:\Users\taikongren\.IntelliJIdea15\config\plugins\jr-ide-idea\lib\jrebel\jrebel.jar
+	C:\Users\taikongren\.IntelliJIdea15\config\plugins\jr-ide-idea\lib\jrebel6\jrebel.jar 
+	4.最后重启IDEA 即可
+	

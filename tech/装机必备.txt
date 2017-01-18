@@ -2,7 +2,6 @@ windows：
 	fiddler
 	search everything
 	灵格斯
-	dbeaver
 	secureCRT
 	flashFXP
 	notepad++
@@ -19,6 +18,9 @@ windows：
 	robomongo
 	Weeny Free PDF Password Remover
 	unlocker
+	DBeaver
+	冰点文库
+	石墨文档
 	
 ubuntu：
     krusader
